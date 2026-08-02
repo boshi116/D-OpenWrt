@@ -72,7 +72,7 @@ jobs:
             git_clone https://github.com/kongfl888/luci-app-timedreboot luci-app-timedreboot
             git_clone https://github.com/destan19/OpenAppFilter OpenAppFilter
             git_clone https://github.com/upcliujie/luci-app-tcpdump luci-app-tcpdump
-            git_clone https://github.com/Natduki/luci-app-sqm-controller luci-app-sqm-controller
+            #git_clone https://github.com/Natduki/luci-app-sqm-controller luci-app-sqm-controller
             git_clone https://github.com/YusDyr/luci-app-trafficctl luci-app-trafficctl
           } &
 
@@ -115,7 +115,6 @@ jobs:
             git_clone https://github.com/ZeaKyX/speedtest-web speedtest-web
             git_clone https://github.com/ZeaKyX/luci-app-speedtest-web luci-app-speedtest-web
             git_clone https://github.com/vernesong/OpenClash OpenClash
-            git_clone https://github.com/gSpotx2f/luci-app-cpu-status luci-app-cpu-status
             git_clone https://github.com/ilxp/luci-app-ikoolproxy luci-app-ikoolproxy
             git_clone https://github.com/EasyTier/luci-app-easytier luci-app-easytier
             git_clone https://github.com/stackia/rtp2httpd rtp2httpd
@@ -139,7 +138,7 @@ jobs:
             git_clone https://github.com/timsaya/openwrt-bandix-plus openwrt-bandix-plus
             git_clone https://github.com/huchd0/luci-app-netwiz luci-app-netwiz
             git_clone https://github.com/tpxcer/luci-app-minigate luci-app-minigate
-            git_clone https://github.com/MayflyDestiny/luci-app-mosdns-panel luci-app-mosdns-panel
+    
           } &
 
           {
