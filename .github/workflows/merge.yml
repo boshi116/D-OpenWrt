@@ -86,7 +86,8 @@ jobs:
             git_clone https://github.com/sirpdboy/luci-app-parentcontrol luci-app-parentcontrol
             git_clone https://github.com/sirpdboy/luci-app-eqosplus luci-app-eqosplus
             git_clone https://github.com/sirpdboy/luci-app-taskplan luci-app-taskplan
-            git_clone https://github.com/sirpdboy/luci-app-netwizard luci-app-netwizard
+            git_clone https://github.com/sirpdboy/luci-app-netwizard luci-app-netwizar
+            git_clone https://github.com/qimaoww/luci-app-lanspeed luci-app-lanspeed
           } &
 
           {
