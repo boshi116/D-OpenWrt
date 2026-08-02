@@ -23,14 +23,16 @@ jobs:
           persist-credentials: false
           submodules: ''
 
-      - name: 强制清空所有残留（保留.git）
+      - name: 重置并清理工作区
         run: |
-          # 清理临时目录和子模块
-          rm -rf jell_tmp tmp_jell .git/modules/* 2>/dev/null || true
+          # 先重置所有更改
+          git reset --hard HEAD
+          # 清理未跟踪的文件
+          git clean -ffdx
+          # 清理子模块
           git submodule deinit --all -f 2>/dev/null || true
-          git rm --cached -rf jell_tmp tmp_jell 2>/dev/null || true
-          # 清理除.git和.github外的所有文件
-          find . -maxdepth 1 ! -name '.git' ! -name '.github' ! -name '.' -exec rm -rf {} + 2>/dev/null || true
+          # 清理临时目录
+          rm -rf jell_tmp tmp_jell .git/modules/* 2>/dev/null || true
 
       - name: 强制拉取最新代码
         run: |
@@ -49,7 +51,7 @@ jobs:
           git_clone() {
             local repo="$1"
             local dir="$2"
-            git clone --depth 1 "$repo" "$dir" || echo "警告: 克隆 $repo 失败"
+            git clone --depth 1 "$repo" "$dir" || echo "⚠️ 警告: 克隆 $repo 失败"
           }
 
           # 清理旧文件（保留.git和.github）
@@ -152,7 +154,7 @@ jobs:
           
           # 清理克隆的仓库中的git目录和其他不需要的文件
           find . -maxdepth 2 -type d -name ".git" -exec rm -rf {} + 2>/dev/null || true
-          find . -maxdepth 2 -type f -name "README.md" -exec rm -f {} + 2>/dev/null || true
+          find . -maxdepth 2 -type f -name "README.md" -not -path "./README.md" -exec rm -f {} + 2>/dev/null || true
           find . -maxdepth 2 -type f -name "LICENSE" -exec rm -f {} + 2>/dev/null || true
           
           echo "✅ 下载完成，当前目录内容："
@@ -166,9 +168,13 @@ jobs:
             exit 1
           fi
           
+          # 创建或更新 README.md
           touch README.md
           
-          git add -A 
+          # 添加所有更改
+          git add -A
+          
+          # 检查是否有更改
           CHANGES=$(git status --porcelain)
           
           if [ -n "$CHANGES" ]; then
@@ -179,27 +185,41 @@ jobs:
 
             FILE_COUNT=$(echo "$CHANGES" | wc -l)
             UPDATE_TIME=$(date '+%Y-%m-%d %H:%M:%S')
-            # 提取更新的目录名
-            UPDATE_PLUGINS=$(echo "$CHANGES" | awk '{print $2}' | grep -v '^README.md$' | head -20 | sed 's|^\./||' | cut -d'/' -f1 | sort -u)
+            # 提取更新的目录名（排除README.md）
+            UPDATE_PLUGINS=$(echo "$CHANGES" | awk '{print $2}' | grep -v '^README.md$' | grep -v '^\.git' | head -20 | sed 's|^\./||' | cut -d'/' -f1 | sort -u)
 
+            # 生成新的 README
             {
               echo "## 📦 自用包AI最近自动更新"
               echo "- 更新时间：$UPDATE_TIME"
               echo "- 更新文件数：$FILE_COUNT"
               echo "- 更新插件："
-              echo "$UPDATE_PLUGINS" | while read p; do 
-                if [ -n "$p" ]; then
-                  echo "  - $p"
-                fi
-              done
+              if [ -n "$UPDATE_PLUGINS" ]; then
+                echo "$UPDATE_PLUGINS" | while read p; do 
+                  if [ -n "$p" ]; then
+                    echo "  - $p"
+                  fi
+                done
+              else
+                echo "  - 无插件更新"
+              fi
               echo "---"
               echo
-              cat README.md 2>/dev/null || true
+              # 保留原有的 README 内容（如果存在）
+              if [ -f "README.md" ] && [ -s "README.md" ]; then
+                tail -n +7 README.md 2>/dev/null || true
+              fi
             } > README.tmp && mv README.tmp README.md
 
             git add README.md
+            
+            # 提交更改
             git commit -m "📦 自动更新 $UPDATE_TIME"
+            
+            # 推送
             git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main
+            
+            echo "✅ 推送成功"
           else
             echo "ℹ️ 无文件变更"
             exit 0
