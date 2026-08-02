@@ -23,12 +23,14 @@ jobs:
           persist-credentials: false
           submodules: ''
 
-      - name: 强制清空所有残留
+      - name: 强制清空所有残留（保留.git）
         run: |
-          rm -rf jell_tmp tmp_jell .gitmodules .git/modules/*
+          # 清理临时目录和子模块
+          rm -rf jell_tmp tmp_jell .git/modules/* 2>/dev/null || true
           git submodule deinit --all -f 2>/dev/null || true
           git rm --cached -rf jell_tmp tmp_jell 2>/dev/null || true
-          git clean -ffdx 2>/dev/null || true
+          # 清理除.git和.github外的所有文件
+          find . -maxdepth 1 ! -name '.git' ! -name '.github' ! -name '.' -exec rm -rf {} + 2>/dev/null || true
 
       - name: 强制拉取最新代码
         run: |
@@ -40,18 +42,20 @@ jobs:
           git config --global user.email "actions@github.com"
           sudo timedatectl set-timezone Asia/Shanghai || true
 
-      - name: 下载插件（根目录）
+      - name: 下载插件到根目录
         run: |
           set -euo pipefail
-          shopt -s extglob
-          rm -rf !( .github | README.md | .gitignore | .git )
           
           git_clone() {
             local repo="$1"
             local dir="$2"
-            git clone --depth 1 "$repo" "$dir"
+            git clone --depth 1 "$repo" "$dir" || echo "警告: 克隆 $repo 失败"
           }
 
+          # 清理旧文件（保留.git和.github）
+          find . -maxdepth 1 ! -name '.git' ! -name '.github' ! -name '.' ! -name 'README.md' ! -name '.gitignore' -exec rm -rf {} + 2>/dev/null || true
+
+          # 开始并行克隆
           {
             git_clone https://github.com/kiddin9/luci-app-dnsfilter luci-app-dnsfilter
             git_clone https://github.com/kiddin9/aria2 aria2
@@ -66,7 +70,6 @@ jobs:
             git_clone https://github.com/upcliujie/luci-app-tcpdump luci-app-tcpdump
             git_clone https://github.com/Natduki/luci-app-sqm-controller luci-app-sqm-controller
             git_clone https://github.com/YusDyr/luci-app-trafficctl luci-app-trafficctl
-            #git_clone https://github.com/qimaoww/luci-app-lanspeed luci-app-lanspeed
           } &
 
           {
@@ -89,12 +92,16 @@ jobs:
             git_clone https://github.com/UnblockNeteaseMusic/luci-app-unblockneteasemusic luci-app-unblockneteasemusic
             git_clone https://github.com/sbwml/luci-app-quickfile luci-app-quickfile
             git_clone https://github.com/mossdef-org/luci-app-adblock-fast luci-app-adblock-fast
+            
+            # 特殊处理 vlmcsd
             git clone --depth 1 https://github.com/gaoderby/luci-app-kms tmp_kms
-            cp -r tmp_kms/luci/applications/luci-app-vlmcsd .
-            cp -r tmp_kms/package/network/vlmcsd .
+            cp -r tmp_kms/luci/applications/luci-app-vlmcsd . 2>/dev/null || true
+            cp -r tmp_kms/package/network/vlmcsd . 2>/dev/null || true
             rm -rf tmp_kms
+            
+            # 特殊处理 adblock-fast
             git clone --depth 1 https://github.com/openwrt/packages tmp_openwrt_pkg
-            cp -r tmp_openwrt_pkg/net/adblock-fast .
+            cp -r tmp_openwrt_pkg/net/adblock-fast . 2>/dev/null || true
             rm -rf tmp_openwrt_pkg
           } &
 
@@ -131,19 +138,34 @@ jobs:
           } &
 
           {
+            # 特殊处理 jell
             mkdir -p /tmp/jell
             cd /tmp/jell
             git clone --depth 1 https://github.com/kenzok8/jell .
-            mv -f luci-app-aria2 luci-app-ipsec-server luci-app-pptpd webdav2 luci-app-msd_lite luci-app-onliner msd_lite unishare luci-app-unishare luci-app-rtbwmon luci-app-kodexplorer ${GITHUB_WORKSPACE}/
+            mv -f luci-app-aria2 luci-app-ipsec-server luci-app-pptpd webdav2 luci-app-msd_lite luci-app-onliner msd_lite unishare luci-app-unishare luci-app-rtbwmon luci-app-kodexplorer ${GITHUB_WORKSPACE}/ 2>/dev/null || true
             cd ${GITHUB_WORKSPACE}
             rm -rf /tmp/jell
           } &
 
+          # 等待所有后台任务完成
           wait
-          find . -maxdepth 1 -type d -name ".git*" -o -name "README*" -o -name "LICENSE" -o -name "docs" | xargs rm -rf 2>/dev/null || true
- 
+          
+          # 清理克隆的仓库中的git目录和其他不需要的文件
+          find . -maxdepth 2 -type d -name ".git" -exec rm -rf {} + 2>/dev/null || true
+          find . -maxdepth 2 -type f -name "README.md" -exec rm -f {} + 2>/dev/null || true
+          find . -maxdepth 2 -type f -name "LICENSE" -exec rm -f {} + 2>/dev/null || true
+          
+          echo "✅ 下载完成，当前目录内容："
+          ls -la
+
       - name: 提交并推送更新 + 写入 README.md
         run: |
+          # 确保在git仓库中
+          if [ ! -d ".git" ]; then
+            echo "❌ 错误：.git 目录不存在"
+            exit 1
+          fi
+          
           touch README.md
           
           git add -A 
@@ -157,22 +179,27 @@ jobs:
 
             FILE_COUNT=$(echo "$CHANGES" | wc -l)
             UPDATE_TIME=$(date '+%Y-%m-%d %H:%M:%S')
-            UPDATE_PLUGINS=$(echo "$CHANGES" | awk '{print $2}' | grep '^opd/' | cut -d'/' -f2 | sort -u | head -15)
+            # 提取更新的目录名
+            UPDATE_PLUGINS=$(echo "$CHANGES" | awk '{print $2}' | grep -v '^README.md$' | head -20 | sed 's|^\./||' | cut -d'/' -f1 | sort -u)
 
             {
               echo "## 📦 自用包AI最近自动更新"
               echo "- 更新时间：$UPDATE_TIME"
               echo "- 更新文件数：$FILE_COUNT"
               echo "- 更新插件："
-              echo "$UPDATE_PLUGINS" | while read p; do echo "  - $p"; done
+              echo "$UPDATE_PLUGINS" | while read p; do 
+                if [ -n "$p" ]; then
+                  echo "  - $p"
+                fi
+              done
               echo "---"
               echo
-              cat README.md
+              cat README.md 2>/dev/null || true
             } > README.tmp && mv README.tmp README.md
 
             git add README.md
             git commit -m "📦 自动更新 $UPDATE_TIME"
-            git push --force https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main
+            git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main
           else
             echo "ℹ️ 无文件变更"
             exit 0
