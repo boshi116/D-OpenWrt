@@ -27,8 +27,8 @@ jobs:
         run: |
           # 先重置所有更改
           git reset --hard HEAD
-          # 清理未跟踪的文件
-          git clean -ffdx
+          # 清理未跟踪的文件（保留.git）
+          git clean -ffdx -e .git
           # 清理子模块
           git submodule deinit --all -f 2>/dev/null || true
           # 清理临时目录
@@ -54,8 +54,10 @@ jobs:
             git clone --depth 1 "$repo" "$dir" || echo "⚠️ 警告: 克隆 $repo 失败"
           }
 
-          # 清理旧文件（保留.git和.github）
-          find . -maxdepth 1 ! -name '.git' ! -name '.github' ! -name '.' ! -name 'README.md' ! -name '.gitignore' -exec rm -rf {} + 2>/dev/null || true
+          # 清理旧文件（保留.git, .github, README.md, .gitignore）
+          for item in $(ls -A | grep -v -E '^\.git$|^\.github$|^README.md$|^\.gitignore$'); do
+            rm -rf "$item"
+          done
 
           # 开始并行克隆
           {
@@ -152,8 +154,9 @@ jobs:
           # 等待所有后台任务完成
           wait
           
-          # 清理克隆的仓库中的git目录和其他不需要的文件
-          find . -maxdepth 2 -type d -name ".git" -exec rm -rf {} + 2>/dev/null || true
+          # 清理克隆的仓库中的git目录（但保留主仓库的.git）
+          find . -maxdepth 2 -type d -name ".git" -not -path "./.git" -exec rm -rf {} + 2>/dev/null || true
+          # 清理README和LICENSE文件（但保留主README.md）
           find . -maxdepth 2 -type f -name "README.md" -not -path "./README.md" -exec rm -f {} + 2>/dev/null || true
           find . -maxdepth 2 -type f -name "LICENSE" -exec rm -f {} + 2>/dev/null || true
           
@@ -165,6 +168,8 @@ jobs:
           # 确保在git仓库中
           if [ ! -d ".git" ]; then
             echo "❌ 错误：.git 目录不存在"
+            echo "当前目录内容："
+            ls -la
             exit 1
           fi
           
@@ -185,7 +190,7 @@ jobs:
 
             FILE_COUNT=$(echo "$CHANGES" | wc -l)
             UPDATE_TIME=$(date '+%Y-%m-%d %H:%M:%S')
-            # 提取更新的目录名（排除README.md）
+            # 提取更新的目录名
             UPDATE_PLUGINS=$(echo "$CHANGES" | awk '{print $2}' | grep -v '^README.md$' | grep -v '^\.git' | head -20 | sed 's|^\./||' | cut -d'/' -f1 | sort -u)
 
             # 生成新的 README
