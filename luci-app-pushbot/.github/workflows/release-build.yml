@@ -1,0 +1,201 @@
+#
+#* Copyright (C) 2025-2025 sbwml
+#* https://github.com/sbwml/luci-app-mosdns/blob/v5/.github/workflows/release-build.yml
+#* This is free software, licensed under the GNU General Public License v3.
+#* See /LICENSE for more information.
+#
+#
+
+name: Build luci-app-pushbot
+
+on:
+  push:
+    tags:
+      - "v*"
+
+env:
+  TZ: Asia/Shanghai
+
+jobs:
+  # ========== Job 1: luci-app-pushbot (noarch，只编译一次) ==========
+  build-luci:
+    name: Build luci-app-pushbot (${{ matrix.sdk }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        sdk:
+          - openwrt-24.10
+          - SNAPSHOT
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Prepare Feed Directory
+        run: |
+          mkdir -p openwrt-feed/luci-app-pushbot
+          cp -r luci-app-pushbot/* openwrt-feed/luci-app-pushbot/
+          chmod +x openwrt-feed/luci-app-pushbot/root/etc/init.d/pushbot || true
+          chmod +x openwrt-feed/luci-app-pushbot/root/usr/bin/pushbot/pushbot || true
+      - name: Build Packages
+        uses: sbwml/openwrt-gh-action-sdk@go1.25
+        env:
+          ARCH: x86_64-${{ matrix.sdk }}
+          FEED_DIR: ${{ github.workspace }}/openwrt-feed
+          FEEDNAME: packages_ci
+          PACKAGES: luci-app-pushbot
+          NO_REFRESH_CHECK: true
+      - name: Collect and rename packages
+        run: |
+          mkdir -p upload
+          find bin/packages/ -name "luci-app-pushbot*" -exec cp {} upload/ \;
+          cd upload
+          for f in *; do
+            ext="${f##*.}"
+            base="${f%.*}"
+            mv "$f" "${base}_${{ matrix.sdk }}.${ext}"
+          done
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: luci-app-pushbot-${{ matrix.sdk }}
+          path: upload/*
+      - name: Upload to release
+        uses: ncipollo/release-action@v1
+        with:
+          name: ${{ github.ref_name }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          allowUpdates: true
+          replacesArtifacts: true
+          prerelease: false
+          artifacts: "upload/*"
+          body: |
+            ## LuCI App Pushbot ${{ github.ref_name }}
+
+            ### 快速安装
+
+            下载 `luci-app-pushbot`（所有架构通用）并上传到路由器安装：
+
+            ```bash
+            # IPK 安装
+            opkg install luci-app-pushbot-*.ipk
+
+            # APK 安装（OpenWrt 24.10+）
+            apk add --allow-untrusted luci-app-pushbot-*.apk
+            ```
+
+            ### luci-app-pushbot
+
+            架构无关包，所有设备通用，按 SDK 版本选择对应的 ipk/apk 文件直接安装。
+
+            ### aes-tool（可选）
+
+            仅在 Bark 推送使用 **GCM 加密模式**时需要安装。
+            CBC/ECB 加密使用系统自带的 openssl，无需额外安装。
+
+            ```bash
+            # 按需安装（仅 GCM 加密）
+            opkg install aes-tool-*.ipk
+            # 或
+            apk add --allow-untrusted aes-tool-*.apk
+            ```
+
+            | 类型 | 架构 | 典型设备 |
+            |------|------|----------|
+            | x86 | `x86_64` | 软路由 |
+            | ARM64 | `aarch64_generic` | 通用 ARM64 |
+            | ARM64 | `aarch64_cortex-a53` | 树莓派3 等 |
+            | ARM64 | `aarch64_cortex-a72` | 树莓派4 等 |
+            | ARM32 | `arm_cortex-a7` | 常见 ARM7 设备 |
+            | ARM32 | `arm_cortex-a7_neon-vfpv4` | IPQ40xx 等 |
+            | ARM32 | `arm_cortex-a9` / `a9_neon` | Marvell 等 |
+            | ARM32 | `arm_cortex-a15_neon-vfpv4` | IPQ806x 等 |
+            | MIPS | `mipsel_24kc` | MT7621 (小米/红米) |
+            | MIPS | `mipsel_74kc` | MT7620 |
+            | MIPS | `mips_24kc` | AR71xx/QCA |
+            | RISC-V | `riscv64_riscv64` | RISC-V 64位 |
+
+            ### 不知道选哪个？
+
+            SSH 到路由器执行：
+            ```bash
+            # OpenWrt 旧版
+            opkg print-architecture
+            # OpenWrt 24.10+
+            apk --print-arch
+            ```
+
+            ---
+
+            | SDK 版本 | 说明 |
+            |----------|------|
+            | **openwrt-24.10** | 稳定版 |
+            | **SNAPSHOT** | 开发版 |
+
+  # ========== Job 2: aes-tool (C 编译，按架构) ==========
+  build-aes-tool:
+    name: Build aes-tool ${{ matrix.arch }}-${{ matrix.sdk }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+          - x86_64
+          - aarch64_cortex-a53
+          - aarch64_cortex-a72
+          - aarch64_generic
+          - arm_cortex-a7
+          - arm_cortex-a7_neon-vfpv4
+          - arm_cortex-a9
+          - arm_cortex-a9_neon
+          - arm_cortex-a15_neon-vfpv4
+          - mips_24kc
+          - mipsel_24kc
+          - mipsel_74kc
+          - riscv64_riscv64
+        sdk:
+          - openwrt-24.10
+          - SNAPSHOT
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Prepare Feed Directory
+        run: |
+          mkdir -p openwrt-feed/aes-tool
+          cp -r aes-tool/* openwrt-feed/aes-tool/
+      - name: Build Packages
+        uses: sbwml/openwrt-gh-action-sdk@go1.25
+        env:
+          ARCH: ${{ matrix.arch }}-${{ matrix.sdk }}
+          FEED_DIR: ${{ github.workspace }}/openwrt-feed
+          FEEDNAME: packages_ci
+          PACKAGES: aes-tool
+          NO_REFRESH_CHECK: true
+      - name: Collect and rename packages
+        continue-on-error: true
+        run: |
+          mkdir -p upload
+          # 处理 riscv64 路径特殊情况
+          if [ "${{ matrix.arch }}" = "riscv64_riscv64" ] && [ "${{ matrix.sdk }}" = "SNAPSHOT" ]; then
+            find bin/packages/riscv64_generic/packages_ci/ -name "aes-tool*" -exec cp {} upload/ \; 2>/dev/null
+          else
+            find bin/packages/${{ matrix.arch }}/packages_ci/ -name "aes-tool*" -exec cp {} upload/ \; 2>/dev/null
+          fi
+          cd upload
+          for f in *; do
+            ext="${f##*.}"
+            base="${f%.*}"
+            mv "$f" "${base}_${{ matrix.arch }}_${{ matrix.sdk }}.${ext}"
+          done
+      - name: Upload to release
+        uses: ncipollo/release-action@v1
+        with:
+          name: ${{ github.ref_name }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          allowUpdates: true
+          replacesArtifacts: true
+          prerelease: false
+          artifacts: "upload/*"
