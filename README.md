@@ -1,12 +1,8 @@
 ## 📦 自用包自动更新
 
-- **更新时间**：2026-08-03 18:33:15
-- **更新文件数**：1059
+- **更新时间**：2026-08-03 18:40:05
+- **更新文件数**：19
 - **更新插件**：
-  - `"luci-app-bandix`
-  - `"openwrt-bandix`
-  - `"openwrt-passwall`
-  - `"openwrt-passwall2`
   - `luci-app-argon-config`
   - `luci-app-bandix`
   - `luci-app-bandix-plus`
