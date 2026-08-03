@@ -108,7 +108,7 @@ jobs:
             ["luci-app-adguardhome"]="https://github.com/kenzok78/luci-app-adguardhome"
             ["luci-app-smartdns"]="https://github.com/pymumu/luci-app-smartdns"
             ["smartdns"]="https://github.com/pymumu/openwrt-smartdns"
-           #["openwrt-passwall2"]="https://github.com/Openwrt-Passwall/openwrt-passwall2"
+            #["openwrt-passwall2"]="https://github.com/Openwrt-Passwall/openwrt-passwall2"
             ["openwrt-passwall"]="https://github.com/Openwrt-Passwall/openwrt-passwall"
             ["luci-app-bandix"]="https://github.com/timsaya/luci-app-bandix"
             ["openwrt-bandix"]="https://github.com/timsaya/openwrt-bandix"
@@ -116,7 +116,7 @@ jobs:
             ["openwrt-bandix-plus"]="https://github.com/timsaya/openwrt-bandix-plus"
             ["luci-app-netwiz"]="https://github.com/huchd0/luci-app-netwiz"
             ["luci-app-minigate"]="https://github.com/tpxcer/luci-app-minigate"
-           #["luci-app-mosdns-panel"]="https://github.com/MayflyDestiny/luci-app-mosdns-panel"
+            #["luci-app-mosdns-panel"]="https://github.com/MayflyDestiny/luci-app-mosdns-panel"
           )
           
           special_downloads() {
@@ -268,7 +268,6 @@ jobs:
         run: |
           if [ ! -d ".git" ]; then
             echo "❌ 错误：.git 目录不存在"
-            ls -la
             exit 1
           fi
           
@@ -285,48 +284,33 @@ jobs:
           UPDATE_TIME=$(TZ=Asia/Shanghai date '+%Y-%m-%d %H:%M:%S')
           FILE_COUNT=$(echo "$CHANGES" | wc -l)
           
-          UPDATE_PLUGINS=$(echo "$CHANGES" | awk '{print $2}' | grep -v '^README.md$' | head -20 | sed 's|^\./||' | cut -d'/' -f1 | sort -u | sed '/^$/d')
+          PLUGINS=$(echo "$CHANGES" | awk '{print $2}' | grep -v '^README.md$' | sed 's|^\./||' | cut -d'/' -f1 | sort -u | grep -v '^$' | sed 's/^/  - `/; s/$/`/')
           
-          cat > README.md << 'EOFREADME'
+          cat > README.md << EOF
           ## 📦 自用包自动更新
           
-          - **更新时间**：UPDATE_TIME_PLACEHOLDER
-          - **更新文件数**：FILE_COUNT_PLACEHOLDER
+          - **更新时间**：${UPDATE_TIME}
+          - **更新文件数**：${FILE_COUNT}
           - **更新插件**：
-          UPDATE_PLUGINS_PLACEHOLDER
+          ${PLUGINS:-  - 配置文件更新}
           
           ---
           
           本仓库由 GitHub Actions 自动维护，每13小时检查一次更新。
-          EOFREADME
-          
-          sed -i "s|UPDATE_TIME_PLACEHOLDER|$UPDATE_TIME|g" README.md
-          sed -i "s|FILE_COUNT_PLACEHOLDER|$FILE_COUNT|g" README.md
-          
-          if [ -n "$UPDATE_PLUGINS" ]; then
-            PLUGIN_LIST=$(echo "$UPDATE_PLUGINS" | while read -r p; do
-              [ -n "$p" ] && echo "  - \`$p\`"
-            done)
-            sed -i "s|UPDATE_PLUGINS_PLACEHOLDER|$PLUGIN_LIST|g" README.md
-          else
-            sed -i "s|UPDATE_PLUGINS_PLACEHOLDER|  - 配置文件更新|g" README.md
-          fi
+          EOF
           
           git add -A
-          git commit -m "📦 自动更新 - $UPDATE_TIME" || {
-            echo "⚠️ 提交失败或没有变更"
-            exit 0
-          }
+          git commit -m "📦 自动更新 - ${UPDATE_TIME}" || exit 0
           
-          for i in {1..3}; do
+          for i in 1 2 3; do
             if git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main; then
               echo "✅ 推送成功"
               exit 0
             fi
-            echo "⚠️ 推送失败，第${i}次重试..."
-            sleep $((RANDOM % 10 + 5))
-            git pull --rebase https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git main
+            echo "⚠️ 推送失败，${i}/3 重试..."
+            sleep 5
+            git fetch origin main && git rebase origin/main || true
           done
           
-          echo "❌ 推送失败，请手动检查"
+          echo "❌ 推送失败"
           exit 1
