@@ -1,9 +1,10 @@
 ## 📦 自用包AI最近自动更新
-- 更新时间：2026-08-02 17:19:35
-- 更新文件数：60
+- 更新时间：2026-08-03 16:43:55
+- 更新文件数：24
 - 更新插件：
-  - luci-app-cpu-status
-  - luci-app-mosdns-panel
+  - luci-app-tinyfilemanager
+---
+
 ---
 
 
