@@ -63,69 +63,6 @@ jobs:
             fi
           }
           
-          # 定义所有需要克隆的仓库
-          clone_all_repos() {
-            # kiddin9 仓库
-            git_clone "https://github.com/kiddin9/luci-app-dnsfilter" "luci-app-dnsfilter" || true
-            git_clone "https://github.com/kiddin9/aria2" "aria2" || true
-            git_clone "https://github.com/kiddin9/autoshare" "autoshare" || true
-            git_clone "https://github.com/kiddin9/luci-app-wizard" "luci-app-wizard" || true
-            
-            # 网络工具
-            git_clone "https://github.com/riverscn/openwrt-iptvhelper" "openwrt-iptvhelper" || true
-            git_clone "https://github.com/kongfl888/luci-app-timedreboot" "luci-app-timedreboot" || true
-            git_clone "https://github.com/destan19/OpenAppFilter" "OpenAppFilter" || true
-            git_clone "https://github.com/upcliujie/luci-app-tcpdump" "luci-app-tcpdump" || true
-            git_clone "https://github.com/Natduki/luci-app-sqm-controller" "luci-app-sqm-controller" || true
-            git_clone "https://github.com/YusDyr/luci-app-trafficctl" "luci-app-trafficctl" || true
-            
-            # sirpdboy 仓库
-            git_clone "https://github.com/sirpdboy/luci-app-timecontrol" "luci-app-timecontrol" || true
-            git_clone "https://github.com/sirpdboy/luci-app-advancedplus" "luci-app-advancedplus" || true
-            git_clone "https://github.com/sirpdboy/luci-app-partexp" "luci-app-partexp" || true
-            git_clone "https://github.com/sirpdboy/netspeedtest" "netspeedtest" || true
-            git_clone "https://github.com/sirpdboy/luci-app-watchdog" "luci-app-watchdog" || true
-            git_clone "https://github.com/sirpdboy/luci-app-parentcontrol" "luci-app-parentcontrol" || true
-            git_clone "https://github.com/sirpdboy/luci-app-eqosplus" "luci-app-eqosplus" || true
-            git_clone "https://github.com/sirpdboy/luci-app-taskplan" "luci-app-taskplan" || true
-            git_clone "https://github.com/sirpdboy/luci-app-netwizard" "luci-app-netwizard" || true
-            
-            # 其他常用插件
-            git_clone "https://github.com/gdy666/luci-app-lucky" "luci-app-lucky" || true
-            git_clone "https://github.com/brvphoenix/luci-app-wrtbwmon" "luci-app-wrtbwmon" || true
-            git_clone "https://github.com/brvphoenix/wrtbwmon" "wrtbwmon" || true
-            git_clone "https://github.com/sbwml/luci-app-mosdns" "luci-app-mosdns" || true
-            git_clone "https://github.com/UnblockNeteaseMusic/luci-app-unblockneteasemusic" "luci-app-unblockneteasemusic" || true
-            git_clone "https://github.com/sbwml/luci-app-quickfile" "luci-app-quickfile" || true
-            git_clone "https://github.com/mossdef-org/luci-app-adblock-fast" "luci-app-adblock-fast" || true
-            git_clone "https://github.com/tty228/luci-app-wechatpush" "luci-app-wechatpush" || true
-            git_clone "https://github.com/ZeaKyX/speedtest-web" "speedtest-web" || true
-            git_clone "https://github.com/ZeaKyX/luci-app-speedtest-web" "luci-app-speedtest-web" || true
-            git_clone "https://github.com/vernesong/OpenClash" "OpenClash" || true
-            git_clone "https://github.com/gSpotx2f/luci-app-cpu-status" "luci-app-cpu-status" || true
-            git_clone "https://github.com/ilxp/luci-app-ikoolproxy" "luci-app-ikoolproxy" || true
-            git_clone "https://github.com/EasyTier/luci-app-easytier" "luci-app-easytier" || true
-            git_clone "https://github.com/stackia/rtp2httpd" "rtp2httpd" || true
-            git_clone "https://github.com/jerrykuku/luci-app-argon-config" "luci-app-argon-config" || true
-            git_clone "https://github.com/jerrykuku/luci-theme-argon" "luci-theme-argon" || true
-            git_clone "https://github.com/gaoyaxuan/luci-app-pushbot" "luci-app-pushbot" || true
-            git_clone "https://github.com/nooblk-98/luci-app-netstat" "luci-app-netstat" || true
-            git_clone "https://github.com/nooblk-98/luci-theme-noobwrt" "luci-theme-noobwrt" || true
-            git_clone "https://github.com/muink/luci-app-tinyfilemanager" "luci-app-tinyfilemanager" || true
-            git_clone "https://github.com/kenzok78/luci-app-adguardhome" "luci-app-adguardhome" || true
-            git_clone "https://github.com/pymumu/luci-app-smartdns" "luci-app-smartdns" || true
-            git_clone "https://github.com/pymumu/openwrt-smartdns" "smartdns" || true
-            git_clone "https://github.com/Openwrt-Passwall/openwrt-passwall2" "openwrt-passwall2" || true
-            git_clone "https://github.com/Openwrt-Passwall/openwrt-passwall" "openwrt-passwall" || true
-            git_clone "https://github.com/timsaya/luci-app-bandix" "luci-app-bandix" || true
-            git_clone "https://github.com/timsaya/openwrt-bandix" "openwrt-bandix" || true
-            git_clone "https://github.com/timsaya/luci-app-bandix-plus" "luci-app-bandix-plus" || true
-            git_clone "https://github.com/timsaya/openwrt-bandix-plus" "openwrt-bandix-plus" || true
-            git_clone "https://github.com/huchd0/luci-app-netwiz" "luci-app-netwiz" || true
-            git_clone "https://github.com/tpxcer/luci-app-minigate" "luci-app-minigate" || true
-            git_clone "https://github.com/MayflyDestiny/luci-app-mosdns-panel" "luci-app-mosdns-panel" || true
-          }
-          
           special_downloads() {
             echo "🔄 处理特殊仓库: vlmcsd"
             if tmpdir=$(mktemp -d); then
@@ -170,7 +107,6 @@ jobs:
           
           echo "🚀 开始并行下载..."
           
-          # 分批并行执行
           (
             # 批次1
             git_clone "https://github.com/kiddin9/luci-app-dnsfilter" "luci-app-dnsfilter" || true
@@ -181,7 +117,6 @@ jobs:
             git_clone "https://github.com/kongfl888/luci-app-timedreboot" "luci-app-timedreboot" || true
             git_clone "https://github.com/destan19/OpenAppFilter" "OpenAppFilter" || true
             git_clone "https://github.com/upcliujie/luci-app-tcpdump" "luci-app-tcpdump" || true
-            git_clone "https://github.com/Natduki/luci-app-sqm-controller" "luci-app-sqm-controller" || true
             git_clone "https://github.com/YusDyr/luci-app-trafficctl" "luci-app-trafficctl" || true
           ) &
           PID1=$!
@@ -218,7 +153,6 @@ jobs:
           
           (
             # 批次4
-            git_clone "https://github.com/gSpotx2f/luci-app-cpu-status" "luci-app-cpu-status" || true
             git_clone "https://github.com/ilxp/luci-app-ikoolproxy" "luci-app-ikoolproxy" || true
             git_clone "https://github.com/EasyTier/luci-app-easytier" "luci-app-easytier" || true
             git_clone "https://github.com/stackia/rtp2httpd" "rtp2httpd" || true
@@ -227,7 +161,6 @@ jobs:
             git_clone "https://github.com/gaoyaxuan/luci-app-pushbot" "luci-app-pushbot" || true
             git_clone "https://github.com/nooblk-98/luci-app-netstat" "luci-app-netstat" || true
             git_clone "https://github.com/nooblk-98/luci-theme-noobwrt" "luci-theme-noobwrt" || true
-            git_clone "https://github.com/muink/luci-app-tinyfilemanager" "luci-app-tinyfilemanager" || true
           ) &
           PID4=$!
           
@@ -236,7 +169,6 @@ jobs:
             git_clone "https://github.com/kenzok78/luci-app-adguardhome" "luci-app-adguardhome" || true
             git_clone "https://github.com/pymumu/luci-app-smartdns" "luci-app-smartdns" || true
             git_clone "https://github.com/pymumu/openwrt-smartdns" "smartdns" || true
-            git_clone "https://github.com/Openwrt-Passwall/openwrt-passwall2" "openwrt-passwall2" || true
             git_clone "https://github.com/Openwrt-Passwall/openwrt-passwall" "openwrt-passwall" || true
             git_clone "https://github.com/timsaya/luci-app-bandix" "luci-app-bandix" || true
             git_clone "https://github.com/timsaya/openwrt-bandix" "openwrt-bandix" || true
@@ -244,7 +176,6 @@ jobs:
             git_clone "https://github.com/timsaya/openwrt-bandix-plus" "openwrt-bandix-plus" || true
             git_clone "https://github.com/huchd0/luci-app-netwiz" "luci-app-netwiz" || true
             git_clone "https://github.com/tpxcer/luci-app-minigate" "luci-app-minigate" || true
-            git_clone "https://github.com/MayflyDestiny/luci-app-mosdns-panel" "luci-app-mosdns-panel" || true
           ) &
           PID5=$!
           
