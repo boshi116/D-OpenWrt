@@ -1,50 +1,9 @@
-concurrency:
-  group: my-packages
-  cancel-in-progress: true
-
-on:
-  push:
-    paths:
-      - '.github/workflows/merge.yml'
-  schedule:
-    - cron: '0 */13 * * *'
-  workflow_dispatch:
-
-jobs:
-  build:
-    runs-on: ubuntu-22.04
-    permissions:
-      contents: write
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-          submodules: ''
-
-      - name: 重置并清理工作区
-        run: |
-          git reset --hard HEAD
-          git clean -ffdx -e .git -e .github -e README.md -e .gitignore
-          git submodule deinit --all -f 2>/dev/null || true
-          rm -rf jell_tmp tmp_jell .git/modules/* 2>/dev/null || true
-
-      - name: 强制拉取最新代码
-        run: |
-          git pull --force --rebase https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git main
-
-      - name: 设置 Git 和环境
-        run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
-          # 使用 TZ 环境变量设置时区（更可靠）
-          echo "TZ=Asia/Shanghai" >> $GITHUB_ENV
-
       - name: 下载插件到根目录
         id: download
+        shell: bash
         run: |
-          set -euo pipefail
+          # 不使用 set -e，改为手动错误处理
+          set -uo pipefail
           
           # 创建临时目录用于下载
           DOWNLOAD_DIR=$(mktemp -d)
@@ -54,16 +13,19 @@ jobs:
             local repo="$1"
             local dir="$2"
             local target="${DOWNLOAD_DIR}/${dir}"
-            if git clone --depth 1 "$repo" "$target" 2>/dev/null; then
+            echo "🔄 正在克隆: $dir"
+            if git clone --depth 1 "$repo" "$target" 2>&1; then
               echo "✅ 成功克隆: $dir"
+              return 0
             else
-              echo "⚠️ 警告: 克隆 $repo 失败，跳过"
+              echo "⚠️ 警告: 克隆 $dir 失败，跳过"
               return 1
             fi
           }
 
           # 定义需要下载的仓库列表
-          declare -A REPOS=(
+          declare -A REPOS
+          REPOS=(
             # kiddin9
             ["luci-app-dnsfilter"]="https://github.com/kiddin9/luci-app-dnsfilter"
             ["aria2"]="https://github.com/kiddin9/aria2"
@@ -125,81 +87,162 @@ jobs:
             ["luci-app-mosdns-panel"]="https://github.com/MayflyDestiny/luci-app-mosdns-panel"
           )
           
-          # 并行下载函数
+          # 下载函数 - 不使用 set -e 的严格模式
           download_batch() {
-            local -n repos=$1
-            for dir in "${!repos[@]}"; do
-              git_clone "${repos[$dir]}" "$dir"
+            local -n repos_ref=$1
+            for dir in "${!repos_ref[@]}"; do
+              git_clone "${repos_ref[$dir]}" "$dir" || true  # 明确忽略错误
             done
           }
           
-          # 分批并行下载（避免同时过多连接）
-          batch1_keys=("luci-app-dnsfilter" "aria2" "autoshare" "luci-app-wizard" "openwrt-iptvhelper" "luci-app-timedreboot" "OpenAppFilter" "luci-app-tcpdump" "luci-app-sqm-controller" "luci-app-trafficctl")
-          batch2_keys=("luci-app-timecontrol" "luci-app-advancedplus" "luci-app-partexp" "netspeedtest" "luci-app-watchdog" "luci-app-parentcontrol" "luci-app-eqosplus" "luci-app-taskplan" "luci-app-netwizard" "luci-app-lucky")
-          batch3_keys=("luci-app-wrtbwmon" "wrtbwmon" "luci-app-mosdns" "luci-app-unblockneteasemusic" "luci-app-quickfile" "luci-app-adblock-fast" "luci-app-wechatpush" "speedtest-web" "luci-app-speedtest-web" "OpenClash")
-          batch4_keys=("luci-app-cpu-status" "luci-app-ikoolproxy" "luci-app-easytier" "rtp2httpd" "luci-app-argon-config" "luci-theme-argon" "luci-app-pushbot" "luci-app-netstat" "luci-theme-noobwrt" "luci-app-tinyfilemanager")
-          batch5_keys=("luci-app-adguardhome" "luci-app-smartdns" "smartdns" "openwrt-passwall2" "openwrt-passwall" "luci-app-bandix" "openwrt-bandix" "luci-app-bandix-plus" "openwrt-bandix-plus" "luci-app-netwiz" "luci-app-minigate" "luci-app-mosdns-panel")
-          
-          # 特殊处理
+          # 特殊处理函数
           special_downloads() {
             # vlmcsd
+            echo "🔄 处理特殊仓库: vlmcsd"
             if tmpdir=$(mktemp -d); then
-              git clone --depth 1 https://github.com/gaoderby/luci-app-kms "$tmpdir/kms" 2>/dev/null && {
+              if git clone --depth 1 https://github.com/gaoderby/luci-app-kms "$tmpdir/kms" 2>/dev/null; then
                 cp -r "$tmpdir/kms/luci/applications/luci-app-vlmcsd" "${DOWNLOAD_DIR}/luci-app-vlmcsd" 2>/dev/null || true
                 cp -r "$tmpdir/kms/package/network/vlmcsd" "${DOWNLOAD_DIR}/vlmcsd" 2>/dev/null || true
-              }
+                echo "✅ 成功处理: vlmcsd"
+              else
+                echo "⚠️ 警告: 处理 vlmcsd 失败"
+              fi
               rm -rf "$tmpdir"
             fi
             
             # adblock-fast
+            echo "🔄 处理特殊仓库: adblock-fast"
             if tmpdir=$(mktemp -d); then
-              git clone --depth 1 https://github.com/openwrt/packages "$tmpdir/packages" 2>/dev/null && {
+              if git clone --depth 1 https://github.com/openwrt/packages "$tmpdir/packages" 2>/dev/null; then
                 cp -r "$tmpdir/packages/net/adblock-fast" "${DOWNLOAD_DIR}/adblock-fast" 2>/dev/null || true
-              }
+                echo "✅ 成功处理: adblock-fast"
+              else
+                echo "⚠️ 警告: 处理 adblock-fast 失败"
+              fi
               rm -rf "$tmpdir"
             fi
             
             # jell
+            echo "🔄 处理特殊仓库: jell"
             if tmpdir=$(mktemp -d); then
-              git clone --depth 1 https://github.com/kenzok8/jell "$tmpdir/jell" 2>/dev/null && {
+              if git clone --depth 1 https://github.com/kenzok8/jell "$tmpdir/jell" 2>/dev/null; then
                 for item in luci-app-aria2 luci-app-ipsec-server luci-app-pptpd webdav2 luci-app-msd_lite luci-app-onliner msd_lite unishare luci-app-unishare luci-app-rtbwmon luci-app-kodexplorer; do
                   if [ -d "$tmpdir/jell/$item" ]; then
                     cp -r "$tmpdir/jell/$item" "${DOWNLOAD_DIR}/$item"
                   fi
                 done
-              }
+                echo "✅ 成功处理: jell"
+              else
+                echo "⚠️ 警告: 处理 jell 失败"
+              fi
               rm -rf "$tmpdir"
             fi
+            
+            return 0  # 总是返回成功
           }
           
-          # 执行并行下载
-          download_batch batch1_keys &
-          download_batch batch2_keys &
-          download_batch batch3_keys &
-          download_batch batch4_keys &
-          download_batch batch5_keys &
-          special_downloads &
+          # 定义批次键值
+          batch1_keys=(
+            "luci-app-dnsfilter" "aria2" "autoshare" "luci-app-wizard" 
+            "openwrt-iptvhelper" "luci-app-timedreboot" "OpenAppFilter" 
+            "luci-app-tcpdump" "luci-app-sqm-controller" "luci-app-trafficctl"
+          )
           
-          # 等待所有后台任务完成并检查状态
-          FAILED=0
-          for job in $(jobs -p); do
-            wait $job || ((FAILED++))
-          done
+          batch2_keys=(
+            "luci-app-timecontrol" "luci-app-advancedplus" "luci-app-partexp" 
+            "netspeedtest" "luci-app-watchdog" "luci-app-parentcontrol" 
+            "luci-app-eqosplus" "luci-app-taskplan" "luci-app-netwizard" "luci-app-lucky"
+          )
           
-          if [ $FAILED -gt 0 ]; then
-            echo "⚠️ 警告: $FAILED 个并行任务失败"
-          fi
+          batch3_keys=(
+            "luci-app-wrtbwmon" "wrtbwmon" "luci-app-mosdns" 
+            "luci-app-unblockneteasemusic" "luci-app-quickfile" "luci-app-adblock-fast" 
+            "luci-app-wechatpush" "speedtest-web" "luci-app-speedtest-web" "OpenClash"
+          )
+          
+          batch4_keys=(
+            "luci-app-cpu-status" "luci-app-ikoolproxy" "luci-app-easytier" 
+            "rtp2httpd" "luci-app-argon-config" "luci-theme-argon" 
+            "luci-app-pushbot" "luci-app-netstat" "luci-theme-noobwrt" "luci-app-tinyfilemanager"
+          )
+          
+          batch5_keys=(
+            "luci-app-adguardhome" "luci-app-smartdns" "smartdns" 
+            "openwrt-passwall2" "openwrt-passwall" "luci-app-bandix" 
+            "openwrt-bandix" "luci-app-bandix-plus" "openwrt-bandix-plus" 
+            "luci-app-netwiz" "luci-app-minigate" "luci-app-mosdns-panel"
+          )
+          
+          # 并行执行下载（每个函数都忽略错误）
+          echo "🚀 开始并行下载..."
+          (
+            for key in "${batch1_keys[@]}"; do
+              git_clone "${REPOS[$key]}" "$key" || true
+            done
+          ) &
+          PID1=$!
+          
+          (
+            for key in "${batch2_keys[@]}"; do
+              git_clone "${REPOS[$key]}" "$key" || true
+            done
+          ) &
+          PID2=$!
+          
+          (
+            for key in "${batch3_keys[@]}"; do
+              git_clone "${REPOS[$key]}" "$key" || true
+            done
+          ) &
+          PID3=$!
+          
+          (
+            for key in "${batch4_keys[@]}"; do
+              git_clone "${REPOS[$key]}" "$key" || true
+            done
+          ) &
+          PID4=$!
+          
+          (
+            for key in "${batch5_keys[@]}"; do
+              git_clone "${REPOS[$key]}" "$key" || true
+            done
+          ) &
+          PID5=$!
+          
+          (special_downloads) &
+          PID6=$!
+          
+          # 等待所有任务完成
+          echo "⏳ 等待所有下载任务完成..."
+          wait $PID1 $PID2 $PID3 $PID4 $PID5 $PID6
+          
+          echo "📊 所有下载任务已完成"
+          
+          # 显示下载结果统计
+          echo "📦 下载目录内容:"
+          ls -la "$DOWNLOAD_DIR" || echo "下载目录为空或不存在"
           
           # 清理旧文件并移动新文件
-          echo "📦 准备更新文件..."
-          find . -maxdepth 1 ! -name '.' ! -name '..' ! -name '.git' ! -name '.github' ! -name 'README.md' ! -name '.gitignore' -exec rm -rf {} +
+          echo "🧹 清理旧文件..."
+          find . -maxdepth 1 ! -name '.' ! -name '..' ! -name '.git' ! -name '.github' ! -name 'README.md' ! -name '.gitignore' -exec rm -rf {} + 2>/dev/null || true
           
           # 移动下载的文件
-          if [ -d "$DOWNLOAD_DIR" ]; then
-            cp -r "$DOWNLOAD_DIR"/* . 2>/dev/null || true
+          if [ -d "$DOWNLOAD_DIR" ] && [ "$(ls -A "$DOWNLOAD_DIR" 2>/dev/null)" ]; then
+            echo "📁 移动新文件到工作目录..."
+            shopt -s dotglob
+            for item in "$DOWNLOAD_DIR"/*; do
+              if [ -e "$item" ]; then
+                cp -r "$item" . 2>/dev/null || true
+              fi
+            done
+            shopt -u dotglob
+          else
+            echo "⚠️ 警告: 下载目录为空，可能所有下载都失败了"
           fi
           
           # 清理 .git 目录
+          echo "🧹 清理子目录中的 .git 文件夹..."
           find . -mindepth 2 -type d -name ".git" -exec rm -rf {} + 2>/dev/null || true
           find . -mindepth 2 -type f -name "README.md" ! -path "./README.md" -delete 2>/dev/null || true
           find . -mindepth 2 -type f -name "LICENSE" -delete 2>/dev/null || true
@@ -207,70 +250,3 @@ jobs:
           echo "✅ 下载完成"
           echo "当前目录内容："
           ls -la
-
-      - name: 提交并推送更新
-        run: |
-          if [ ! -d ".git" ]; then
-            echo "❌ 错误：.git 目录不存在"
-            ls -la
-            exit 1
-          fi
-          
-          # 检查更改
-          CHANGES=$(git status --porcelain)
-          
-          if [ -z "$CHANGES" ]; then
-            echo "ℹ️ 无文件变更，跳过提交"
-            exit 0
-          fi
-          
-          echo "📤 检测到更新："
-          echo "$CHANGES"
-          
-          # 生成更新时间
-          UPDATE_TIME=$(TZ=Asia/Shanghai date '+%Y-%m-%d %H:%M:%S')
-          FILE_COUNT=$(echo "$CHANGES" | wc -l)
-          
-          # 提取更新的插件名
-          UPDATE_PLUGINS=$(echo "$CHANGES" | awk '{print $2}' | grep -v '^README.md$' | head -20 | sed 's|^\./||' | cut -d'/' -f1 | sort -u | sed '/^$/d')
-          
-          # 生成 README
-          cat > README.md << EOF
-          ## 📦 自用包自动更新
-          
-          - **更新时间**：$UPDATE_TIME
-          - **更新文件数**：$FILE_COUNT
-          - **更新插件**：
-          $(if [ -n "$UPDATE_PLUGINS" ]; then
-            echo "$UPDATE_PLUGINS" | while read -r p; do
-              [ -n "$p" ] && echo "  - \`$p\`"
-            done
-          else
-            echo "  - 配置文件更新"
-          fi)
-          
-          ---
-          
-          本仓库由 GitHub Actions 自动维护，每13小时检查一次更新。
-          EOF
-          
-          # 提交所有更改
-          git add -A
-          git commit -m "📦 自动更新 - $UPDATE_TIME" || {
-            echo "⚠️ 提交失败或没有变更"
-            exit 0
-          }
-          
-          # 推送（最多重试3次）
-          for i in {1..3}; do
-            if git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main; then
-              echo "✅ 推送成功"
-              exit 0
-            fi
-            echo "⚠️ 推送失败，第${i}次重试..."
-            sleep $((RANDOM % 10 + 5))
-            git pull --rebase https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git main
-          done
-          
-          echo "❌ 推送失败，请手动检查"
-          exit 1
