@@ -63,57 +63,68 @@ jobs:
             fi
           }
           
-          declare -A REPOS
-          REPOS=(
-            ["luci-app-dnsfilter"]="https://github.com/kiddin9/luci-app-dnsfilter"
-            ["aria2"]="https://github.com/kiddin9/aria2"
-            ["autoshare"]="https://github.com/kiddin9/autoshare"
-            ["luci-app-wizard"]="https://github.com/kiddin9/luci-app-wizard"
-            ["openwrt-iptvhelper"]="https://github.com/riverscn/openwrt-iptvhelper"
-            ["luci-app-timedreboot"]="https://github.com/kongfl888/luci-app-timedreboot"
-            ["OpenAppFilter"]="https://github.com/destan19/OpenAppFilter"
-            ["luci-app-tcpdump"]="https://github.com/upcliujie/luci-app-tcpdump"
-            ["luci-app-sqm-controller"]="https://github.com/Natduki/luci-app-sqm-controller"
-            ["luci-app-trafficctl"]="https://github.com/YusDyr/luci-app-trafficctl"
-            ["luci-app-timecontrol"]="https://github.com/sirpdboy/luci-app-timecontrol"
-            ["luci-app-advancedplus"]="https://github.com/sirpdboy/luci-app-advancedplus"
-            ["luci-app-partexp"]="https://github.com/sirpdboy/luci-app-partexp"
-            ["netspeedtest"]="https://github.com/sirpdboy/netspeedtest"
-            ["luci-app-watchdog"]="https://github.com/sirpdboy/luci-app-watchdog"
-            ["luci-app-parentcontrol"]="https://github.com/sirpdboy/luci-app-parentcontrol"
-            ["luci-app-eqosplus"]="https://github.com/sirpdboy/luci-app-eqosplus"
-            ["luci-app-taskplan"]="https://github.com/sirpdboy/luci-app-taskplan"
-            ["luci-app-netwizard"]="https://github.com/sirpdboy/luci-app-netwizard"
-            ["luci-app-lucky"]="https://github.com/gdy666/luci-app-lucky"
-            ["luci-app-wrtbwmon"]="https://github.com/brvphoenix/luci-app-wrtbwmon"
-            ["wrtbwmon"]="https://github.com/brvphoenix/wrtbwmon"
-            ["luci-app-mosdns"]="https://github.com/sbwml/luci-app-mosdns"
-            ["luci-app-unblockneteasemusic"]="https://github.com/UnblockNeteaseMusic/luci-app-unblockneteasemusic"
-            ["luci-app-quickfile"]="https://github.com/sbwml/luci-app-quickfile"
-            ["luci-app-adblock-fast"]="https://github.com/mossdef-org/luci-app-adblock-fast"
-            ["luci-app-wechatpush"]="https://github.com/tty228/luci-app-wechatpush"
-            ["speedtest-web"]="https://github.com/ZeaKyX/speedtest-web"
-            ["luci-app-speedtest-web"]="https://github.com/ZeaKyX/luci-app-speedtest-web"
-            ["OpenClash"]="https://github.com/vernesong/OpenClash"
-            ["luci-app-ikoolproxy"]="https://github.com/ilxp/luci-app-ikoolproxy"
-            ["luci-app-easytier"]="https://github.com/EasyTier/luci-app-easytier"
-            ["rtp2httpd"]="https://github.com/stackia/rtp2httpd"
-            ["luci-app-argon-config"]="https://github.com/jerrykuku/luci-app-argon-config"
-            ["luci-theme-argon"]="https://github.com/jerrykuku/luci-theme-argon"
-            ["luci-app-pushbot"]="https://github.com/gaoyaxuan/luci-app-pushbot"
-            ["luci-app-netstat"]="https://github.com/nooblk-98/luci-app-netstat"
-            ["luci-theme-noobwrt"]="https://github.com/nooblk-98/luci-theme-noobwrt"
-            ["luci-app-adguardhome"]="https://github.com/kenzok78/luci-app-adguardhome"
-            ["luci-app-smartdns"]="https://github.com/pymumu/luci-app-smartdns"
-            ["smartdns"]="https://github.com/pymumu/openwrt-smartdns"
-            ["openwrt-passwall"]="https://github.com/Openwrt-Passwall/openwrt-passwall"
-            ["luci-app-bandix"]="https://github.com/timsaya/luci-app-bandix"
-            ["openwrt-bandix"]="https://github.com/timsaya/openwrt-bandix"
-            ["luci-app-bandix-plus"]="https://github.com/timsaya/luci-app-bandix-plus"
-            ["openwrt-bandix-plus"]="https://github.com/timsaya/openwrt-bandix-plus"
-            ["luci-app-netwiz"]="https://github.com/huchd0/luci-app-netwiz"
-            ["luci-app-minigate"]="https://github.com/tpxcer/luci-app-minigate"
-          )
+          # 定义所有需要克隆的仓库
+          clone_all_repos() {
+            # kiddin9 仓库
+            git_clone "https://github.com/kiddin9/luci-app-dnsfilter" "luci-app-dnsfilter" || true
+            git_clone "https://github.com/kiddin9/aria2" "aria2" || true
+            git_clone "https://github.com/kiddin9/autoshare" "autoshare" || true
+            git_clone "https://github.com/kiddin9/luci-app-wizard" "luci-app-wizard" || true
+            
+            # 网络工具
+            git_clone "https://github.com/riverscn/openwrt-iptvhelper" "openwrt-iptvhelper" || true
+            git_clone "https://github.com/kongfl888/luci-app-timedreboot" "luci-app-timedreboot" || true
+            git_clone "https://github.com/destan19/OpenAppFilter" "OpenAppFilter" || true
+            git_clone "https://github.com/upcliujie/luci-app-tcpdump" "luci-app-tcpdump" || true
+            git_clone "https://github.com/Natduki/luci-app-sqm-controller" "luci-app-sqm-controller" || true
+            git_clone "https://github.com/YusDyr/luci-app-trafficctl" "luci-app-trafficctl" || true
+            
+            # sirpdboy 仓库
+            git_clone "https://github.com/sirpdboy/luci-app-timecontrol" "luci-app-timecontrol" || true
+            git_clone "https://github.com/sirpdboy/luci-app-advancedplus" "luci-app-advancedplus" || true
+            git_clone "https://github.com/sirpdboy/luci-app-partexp" "luci-app-partexp" || true
+            git_clone "https://github.com/sirpdboy/netspeedtest" "netspeedtest" || true
+            git_clone "https://github.com/sirpdboy/luci-app-watchdog" "luci-app-watchdog" || true
+            git_clone "https://github.com/sirpdboy/luci-app-parentcontrol" "luci-app-parentcontrol" || true
+            git_clone "https://github.com/sirpdboy/luci-app-eqosplus" "luci-app-eqosplus" || true
+            git_clone "https://github.com/sirpdboy/luci-app-taskplan" "luci-app-taskplan" || true
+            git_clone "https://github.com/sirpdboy/luci-app-netwizard" "luci-app-netwizard" || true
+            
+            # 其他常用插件
+            git_clone "https://github.com/gdy666/luci-app-lucky" "luci-app-lucky" || true
+            git_clone "https://github.com/brvphoenix/luci-app-wrtbwmon" "luci-app-wrtbwmon" || true
+            git_clone "https://github.com/brvphoenix/wrtbwmon" "wrtbwmon" || true
+            git_clone "https://github.com/sbwml/luci-app-mosdns" "luci-app-mosdns" || true
+            git_clone "https://github.com/UnblockNeteaseMusic/luci-app-unblockneteasemusic" "luci-app-unblockneteasemusic" || true
+            git_clone "https://github.com/sbwml/luci-app-quickfile" "luci-app-quickfile" || true
+            git_clone "https://github.com/mossdef-org/luci-app-adblock-fast" "luci-app-adblock-fast" || true
+            git_clone "https://github.com/tty228/luci-app-wechatpush" "luci-app-wechatpush" || true
+            git_clone "https://github.com/ZeaKyX/speedtest-web" "speedtest-web" || true
+            git_clone "https://github.com/ZeaKyX/luci-app-speedtest-web" "luci-app-speedtest-web" || true
+            git_clone "https://github.com/vernesong/OpenClash" "OpenClash" || true
+            git_clone "https://github.com/gSpotx2f/luci-app-cpu-status" "luci-app-cpu-status" || true
+            git_clone "https://github.com/ilxp/luci-app-ikoolproxy" "luci-app-ikoolproxy" || true
+            git_clone "https://github.com/EasyTier/luci-app-easytier" "luci-app-easytier" || true
+            git_clone "https://github.com/stackia/rtp2httpd" "rtp2httpd" || true
+            git_clone "https://github.com/jerrykuku/luci-app-argon-config" "luci-app-argon-config" || true
+            git_clone "https://github.com/jerrykuku/luci-theme-argon" "luci-theme-argon" || true
+            git_clone "https://github.com/gaoyaxuan/luci-app-pushbot" "luci-app-pushbot" || true
+            git_clone "https://github.com/nooblk-98/luci-app-netstat" "luci-app-netstat" || true
+            git_clone "https://github.com/nooblk-98/luci-theme-noobwrt" "luci-theme-noobwrt" || true
+            git_clone "https://github.com/muink/luci-app-tinyfilemanager" "luci-app-tinyfilemanager" || true
+            git_clone "https://github.com/kenzok78/luci-app-adguardhome" "luci-app-adguardhome" || true
+            git_clone "https://github.com/pymumu/luci-app-smartdns" "luci-app-smartdns" || true
+            git_clone "https://github.com/pymumu/openwrt-smartdns" "smartdns" || true
+            git_clone "https://github.com/Openwrt-Passwall/openwrt-passwall2" "openwrt-passwall2" || true
+            git_clone "https://github.com/Openwrt-Passwall/openwrt-passwall" "openwrt-passwall" || true
+            git_clone "https://github.com/timsaya/luci-app-bandix" "luci-app-bandix" || true
+            git_clone "https://github.com/timsaya/openwrt-bandix" "openwrt-bandix" || true
+            git_clone "https://github.com/timsaya/luci-app-bandix-plus" "luci-app-bandix-plus" || true
+            git_clone "https://github.com/timsaya/openwrt-bandix-plus" "openwrt-bandix-plus" || true
+            git_clone "https://github.com/huchd0/luci-app-netwiz" "luci-app-netwiz" || true
+            git_clone "https://github.com/tpxcer/luci-app-minigate" "luci-app-minigate" || true
+            git_clone "https://github.com/MayflyDestiny/luci-app-mosdns-panel" "luci-app-mosdns-panel" || true
+          }
           
           special_downloads() {
             echo "🔄 处理特殊仓库: vlmcsd"
@@ -157,71 +168,83 @@ jobs:
             return 0
           }
           
-          batch1_keys=(
-            "luci-app-dnsfilter" "aria2" "autoshare" "luci-app-wizard" 
-            "openwrt-iptvhelper" "luci-app-timedreboot" "OpenAppFilter" 
-            "luci-app-tcpdump" "luci-app-sqm-controller" "luci-app-trafficctl"
-          )
-          
-          batch2_keys=(
-            "luci-app-timecontrol" "luci-app-advancedplus" "luci-app-partexp" 
-            "netspeedtest" "luci-app-watchdog" "luci-app-parentcontrol" 
-            "luci-app-eqosplus" "luci-app-taskplan" "luci-app-netwizard" "luci-app-lucky"
-          )
-          
-          batch3_keys=(
-            "luci-app-wrtbwmon" "wrtbwmon" "luci-app-mosdns" 
-            "luci-app-unblockneteasemusic" "luci-app-quickfile" "luci-app-adblock-fast" 
-            "luci-app-wechatpush" "speedtest-web" "luci-app-speedtest-web" "OpenClash"
-          )
-          
-          batch4_keys=(
-            "luci-app-cpu-status" "luci-app-ikoolproxy" "luci-app-easytier" 
-            "rtp2httpd" "luci-app-argon-config" "luci-theme-argon" 
-            "luci-app-pushbot" "luci-app-netstat" "luci-theme-noobwrt" "luci-app-tinyfilemanager"
-          )
-          
-          batch5_keys=(
-            "luci-app-adguardhome" "luci-app-smartdns" "smartdns" 
-            "openwrt-passwall2" "openwrt-passwall" "luci-app-bandix" 
-            "openwrt-bandix" "luci-app-bandix-plus" "openwrt-bandix-plus" 
-            "luci-app-netwiz" "luci-app-minigate" "luci-app-mosdns-panel"
-          )
-          
           echo "🚀 开始并行下载..."
           
+          # 分批并行执行
           (
-            for key in "${batch1_keys[@]}"; do
-              git_clone "${REPOS[$key]}" "$key" || true
-            done
+            # 批次1
+            git_clone "https://github.com/kiddin9/luci-app-dnsfilter" "luci-app-dnsfilter" || true
+            git_clone "https://github.com/kiddin9/aria2" "aria2" || true
+            git_clone "https://github.com/kiddin9/autoshare" "autoshare" || true
+            git_clone "https://github.com/kiddin9/luci-app-wizard" "luci-app-wizard" || true
+            git_clone "https://github.com/riverscn/openwrt-iptvhelper" "openwrt-iptvhelper" || true
+            git_clone "https://github.com/kongfl888/luci-app-timedreboot" "luci-app-timedreboot" || true
+            git_clone "https://github.com/destan19/OpenAppFilter" "OpenAppFilter" || true
+            git_clone "https://github.com/upcliujie/luci-app-tcpdump" "luci-app-tcpdump" || true
+            git_clone "https://github.com/Natduki/luci-app-sqm-controller" "luci-app-sqm-controller" || true
+            git_clone "https://github.com/YusDyr/luci-app-trafficctl" "luci-app-trafficctl" || true
           ) &
           PID1=$!
           
           (
-            for key in "${batch2_keys[@]}"; do
-              git_clone "${REPOS[$key]}" "$key" || true
-            done
+            # 批次2
+            git_clone "https://github.com/sirpdboy/luci-app-timecontrol" "luci-app-timecontrol" || true
+            git_clone "https://github.com/sirpdboy/luci-app-advancedplus" "luci-app-advancedplus" || true
+            git_clone "https://github.com/sirpdboy/luci-app-partexp" "luci-app-partexp" || true
+            git_clone "https://github.com/sirpdboy/netspeedtest" "netspeedtest" || true
+            git_clone "https://github.com/sirpdboy/luci-app-watchdog" "luci-app-watchdog" || true
+            git_clone "https://github.com/sirpdboy/luci-app-parentcontrol" "luci-app-parentcontrol" || true
+            git_clone "https://github.com/sirpdboy/luci-app-eqosplus" "luci-app-eqosplus" || true
+            git_clone "https://github.com/sirpdboy/luci-app-taskplan" "luci-app-taskplan" || true
+            git_clone "https://github.com/sirpdboy/luci-app-netwizard" "luci-app-netwizard" || true
+            git_clone "https://github.com/gdy666/luci-app-lucky" "luci-app-lucky" || true
           ) &
           PID2=$!
           
           (
-            for key in "${batch3_keys[@]}"; do
-              git_clone "${REPOS[$key]}" "$key" || true
-            done
+            # 批次3
+            git_clone "https://github.com/brvphoenix/luci-app-wrtbwmon" "luci-app-wrtbwmon" || true
+            git_clone "https://github.com/brvphoenix/wrtbwmon" "wrtbwmon" || true
+            git_clone "https://github.com/sbwml/luci-app-mosdns" "luci-app-mosdns" || true
+            git_clone "https://github.com/UnblockNeteaseMusic/luci-app-unblockneteasemusic" "luci-app-unblockneteasemusic" || true
+            git_clone "https://github.com/sbwml/luci-app-quickfile" "luci-app-quickfile" || true
+            git_clone "https://github.com/mossdef-org/luci-app-adblock-fast" "luci-app-adblock-fast" || true
+            git_clone "https://github.com/tty228/luci-app-wechatpush" "luci-app-wechatpush" || true
+            git_clone "https://github.com/ZeaKyX/speedtest-web" "speedtest-web" || true
+            git_clone "https://github.com/ZeaKyX/luci-app-speedtest-web" "luci-app-speedtest-web" || true
+            git_clone "https://github.com/vernesong/OpenClash" "OpenClash" || true
           ) &
           PID3=$!
           
           (
-            for key in "${batch4_keys[@]}"; do
-              git_clone "${REPOS[$key]}" "$key" || true
-            done
+            # 批次4
+            git_clone "https://github.com/gSpotx2f/luci-app-cpu-status" "luci-app-cpu-status" || true
+            git_clone "https://github.com/ilxp/luci-app-ikoolproxy" "luci-app-ikoolproxy" || true
+            git_clone "https://github.com/EasyTier/luci-app-easytier" "luci-app-easytier" || true
+            git_clone "https://github.com/stackia/rtp2httpd" "rtp2httpd" || true
+            git_clone "https://github.com/jerrykuku/luci-app-argon-config" "luci-app-argon-config" || true
+            git_clone "https://github.com/jerrykuku/luci-theme-argon" "luci-theme-argon" || true
+            git_clone "https://github.com/gaoyaxuan/luci-app-pushbot" "luci-app-pushbot" || true
+            git_clone "https://github.com/nooblk-98/luci-app-netstat" "luci-app-netstat" || true
+            git_clone "https://github.com/nooblk-98/luci-theme-noobwrt" "luci-theme-noobwrt" || true
+            git_clone "https://github.com/muink/luci-app-tinyfilemanager" "luci-app-tinyfilemanager" || true
           ) &
           PID4=$!
           
           (
-            for key in "${batch5_keys[@]}"; do
-              git_clone "${REPOS[$key]}" "$key" || true
-            done
+            # 批次5
+            git_clone "https://github.com/kenzok78/luci-app-adguardhome" "luci-app-adguardhome" || true
+            git_clone "https://github.com/pymumu/luci-app-smartdns" "luci-app-smartdns" || true
+            git_clone "https://github.com/pymumu/openwrt-smartdns" "smartdns" || true
+            git_clone "https://github.com/Openwrt-Passwall/openwrt-passwall2" "openwrt-passwall2" || true
+            git_clone "https://github.com/Openwrt-Passwall/openwrt-passwall" "openwrt-passwall" || true
+            git_clone "https://github.com/timsaya/luci-app-bandix" "luci-app-bandix" || true
+            git_clone "https://github.com/timsaya/openwrt-bandix" "openwrt-bandix" || true
+            git_clone "https://github.com/timsaya/luci-app-bandix-plus" "luci-app-bandix-plus" || true
+            git_clone "https://github.com/timsaya/openwrt-bandix-plus" "openwrt-bandix-plus" || true
+            git_clone "https://github.com/huchd0/luci-app-netwiz" "luci-app-netwiz" || true
+            git_clone "https://github.com/tpxcer/luci-app-minigate" "luci-app-minigate" || true
+            git_clone "https://github.com/MayflyDestiny/luci-app-mosdns-panel" "luci-app-mosdns-panel" || true
           ) &
           PID5=$!
           
