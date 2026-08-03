@@ -123,7 +123,7 @@ jobs:
             git_clone https://github.com/gaoyaxuan/luci-app-pushbot luci-app-pushbot
             git_clone https://github.com/nooblk-98/luci-app-netstat luci-app-netstat
             git_clone https://github.com/nooblk-98/luci-theme-noobwrt luci-theme-noobwrt
-            git_clone https://github.com/muink/luci-app-tinyfilemanager luci-app-tinyfilemanager
+            #git_clone https://github.com/muink/luci-app-tinyfilemanager luci-app-tinyfilemanager
           } &
 
           {
