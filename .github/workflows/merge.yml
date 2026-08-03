@@ -7,7 +7,7 @@ on:
     paths:
       - '.github/workflows/merge.yml'
   schedule:
-    - cron: '0 */12 * * *'
+    - cron: '0 */13 * * *'
   workflow_dispatch:
 
 jobs:
@@ -25,207 +25,252 @@ jobs:
 
       - name: 重置并清理工作区
         run: |
-          # 先重置所有更改
           git reset --hard HEAD
-          # 清理未跟踪的文件（保留.git）
-          git clean -ffdx -e .git
-          # 清理子模块
+          git clean -ffdx -e .git -e .github -e README.md -e .gitignore
           git submodule deinit --all -f 2>/dev/null || true
-          # 清理临时目录
           rm -rf jell_tmp tmp_jell .git/modules/* 2>/dev/null || true
 
       - name: 强制拉取最新代码
         run: |
           git pull --force --rebase https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git main
 
-      - name: 设置 Git
+      - name: 设置 Git 和环境
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
-          sudo timedatectl set-timezone Asia/Shanghai || true
+          # 使用 TZ 环境变量设置时区（更可靠）
+          echo "TZ=Asia/Shanghai" >> $GITHUB_ENV
 
       - name: 下载插件到根目录
+        id: download
         run: |
           set -euo pipefail
+          
+          # 创建临时目录用于下载
+          DOWNLOAD_DIR=$(mktemp -d)
+          trap "rm -rf $DOWNLOAD_DIR" EXIT
           
           git_clone() {
             local repo="$1"
             local dir="$2"
-            git clone --depth 1 "$repo" "$dir" || echo "⚠️ 警告: 克隆 $repo 失败"
+            local target="${DOWNLOAD_DIR}/${dir}"
+            if git clone --depth 1 "$repo" "$target" 2>/dev/null; then
+              echo "✅ 成功克隆: $dir"
+            else
+              echo "⚠️ 警告: 克隆 $repo 失败，跳过"
+              return 1
+            fi
           }
 
-          # 清理旧文件（保留.git, .github, README.md, .gitignore）
-          for item in $(ls -A | grep -v -E '^\.git$|^\.github$|^README.md$|^\.gitignore$'); do
-            rm -rf "$item"
+          # 定义需要下载的仓库列表
+          declare -A REPOS=(
+            # kiddin9
+            ["luci-app-dnsfilter"]="https://github.com/kiddin9/luci-app-dnsfilter"
+            ["aria2"]="https://github.com/kiddin9/aria2"
+            ["autoshare"]="https://github.com/kiddin9/autoshare"
+            ["luci-app-wizard"]="https://github.com/kiddin9/luci-app-wizard"
+            
+            # 网络工具
+            ["openwrt-iptvhelper"]="https://github.com/riverscn/openwrt-iptvhelper"
+            ["luci-app-timedreboot"]="https://github.com/kongfl888/luci-app-timedreboot"
+            ["OpenAppFilter"]="https://github.com/destan19/OpenAppFilter"
+            ["luci-app-tcpdump"]="https://github.com/upcliujie/luci-app-tcpdump"
+            ["luci-app-sqm-controller"]="https://github.com/Natduki/luci-app-sqm-controller"
+            ["luci-app-trafficctl"]="https://github.com/YusDyr/luci-app-trafficctl"
+            
+            # sirpdboy
+            ["luci-app-timecontrol"]="https://github.com/sirpdboy/luci-app-timecontrol"
+            ["luci-app-advancedplus"]="https://github.com/sirpdboy/luci-app-advancedplus"
+            ["luci-app-partexp"]="https://github.com/sirpdboy/luci-app-partexp"
+            ["netspeedtest"]="https://github.com/sirpdboy/netspeedtest"
+            ["luci-app-watchdog"]="https://github.com/sirpdboy/luci-app-watchdog"
+            ["luci-app-parentcontrol"]="https://github.com/sirpdboy/luci-app-parentcontrol"
+            ["luci-app-eqosplus"]="https://github.com/sirpdboy/luci-app-eqosplus"
+            ["luci-app-taskplan"]="https://github.com/sirpdboy/luci-app-taskplan"
+            ["luci-app-netwizard"]="https://github.com/sirpdboy/luci-app-netwizard"
+            
+            # 其他常用
+            ["luci-app-lucky"]="https://github.com/gdy666/luci-app-lucky"
+            ["luci-app-wrtbwmon"]="https://github.com/brvphoenix/luci-app-wrtbwmon"
+            ["wrtbwmon"]="https://github.com/brvphoenix/wrtbwmon"
+            ["luci-app-mosdns"]="https://github.com/sbwml/luci-app-mosdns"
+            ["luci-app-unblockneteasemusic"]="https://github.com/UnblockNeteaseMusic/luci-app-unblockneteasemusic"
+            ["luci-app-quickfile"]="https://github.com/sbwml/luci-app-quickfile"
+            ["luci-app-adblock-fast"]="https://github.com/mossdef-org/luci-app-adblock-fast"
+            ["luci-app-wechatpush"]="https://github.com/tty228/luci-app-wechatpush"
+            ["speedtest-web"]="https://github.com/ZeaKyX/speedtest-web"
+            ["luci-app-speedtest-web"]="https://github.com/ZeaKyX/luci-app-speedtest-web"
+            ["OpenClash"]="https://github.com/vernesong/OpenClash"
+            ["luci-app-cpu-status"]="https://github.com/gSpotx2f/luci-app-cpu-status"
+            ["luci-app-ikoolproxy"]="https://github.com/ilxp/luci-app-ikoolproxy"
+            ["luci-app-easytier"]="https://github.com/EasyTier/luci-app-easytier"
+            ["rtp2httpd"]="https://github.com/stackia/rtp2httpd"
+            ["luci-app-argon-config"]="https://github.com/jerrykuku/luci-app-argon-config"
+            ["luci-theme-argon"]="https://github.com/jerrykuku/luci-theme-argon"
+            ["luci-app-pushbot"]="https://github.com/gaoyaxuan/luci-app-pushbot"
+            ["luci-app-netstat"]="https://github.com/nooblk-98/luci-app-netstat"
+            ["luci-theme-noobwrt"]="https://github.com/nooblk-98/luci-theme-noobwrt"
+            ["luci-app-tinyfilemanager"]="https://github.com/muink/luci-app-tinyfilemanager"
+            ["luci-app-adguardhome"]="https://github.com/kenzok78/luci-app-adguardhome"
+            ["luci-app-smartdns"]="https://github.com/pymumu/luci-app-smartdns"
+            ["smartdns"]="https://github.com/pymumu/openwrt-smartdns"
+            ["openwrt-passwall2"]="https://github.com/Openwrt-Passwall/openwrt-passwall2"
+            ["openwrt-passwall"]="https://github.com/Openwrt-Passwall/openwrt-passwall"
+            ["luci-app-bandix"]="https://github.com/timsaya/luci-app-bandix"
+            ["openwrt-bandix"]="https://github.com/timsaya/openwrt-bandix"
+            ["luci-app-bandix-plus"]="https://github.com/timsaya/luci-app-bandix-plus"
+            ["openwrt-bandix-plus"]="https://github.com/timsaya/openwrt-bandix-plus"
+            ["luci-app-netwiz"]="https://github.com/huchd0/luci-app-netwiz"
+            ["luci-app-minigate"]="https://github.com/tpxcer/luci-app-minigate"
+            ["luci-app-mosdns-panel"]="https://github.com/MayflyDestiny/luci-app-mosdns-panel"
+          )
+          
+          # 并行下载函数
+          download_batch() {
+            local -n repos=$1
+            for dir in "${!repos[@]}"; do
+              git_clone "${repos[$dir]}" "$dir"
+            done
+          }
+          
+          # 分批并行下载（避免同时过多连接）
+          batch1_keys=("luci-app-dnsfilter" "aria2" "autoshare" "luci-app-wizard" "openwrt-iptvhelper" "luci-app-timedreboot" "OpenAppFilter" "luci-app-tcpdump" "luci-app-sqm-controller" "luci-app-trafficctl")
+          batch2_keys=("luci-app-timecontrol" "luci-app-advancedplus" "luci-app-partexp" "netspeedtest" "luci-app-watchdog" "luci-app-parentcontrol" "luci-app-eqosplus" "luci-app-taskplan" "luci-app-netwizard" "luci-app-lucky")
+          batch3_keys=("luci-app-wrtbwmon" "wrtbwmon" "luci-app-mosdns" "luci-app-unblockneteasemusic" "luci-app-quickfile" "luci-app-adblock-fast" "luci-app-wechatpush" "speedtest-web" "luci-app-speedtest-web" "OpenClash")
+          batch4_keys=("luci-app-cpu-status" "luci-app-ikoolproxy" "luci-app-easytier" "rtp2httpd" "luci-app-argon-config" "luci-theme-argon" "luci-app-pushbot" "luci-app-netstat" "luci-theme-noobwrt" "luci-app-tinyfilemanager")
+          batch5_keys=("luci-app-adguardhome" "luci-app-smartdns" "smartdns" "openwrt-passwall2" "openwrt-passwall" "luci-app-bandix" "openwrt-bandix" "luci-app-bandix-plus" "openwrt-bandix-plus" "luci-app-netwiz" "luci-app-minigate" "luci-app-mosdns-panel")
+          
+          # 特殊处理
+          special_downloads() {
+            # vlmcsd
+            if tmpdir=$(mktemp -d); then
+              git clone --depth 1 https://github.com/gaoderby/luci-app-kms "$tmpdir/kms" 2>/dev/null && {
+                cp -r "$tmpdir/kms/luci/applications/luci-app-vlmcsd" "${DOWNLOAD_DIR}/luci-app-vlmcsd" 2>/dev/null || true
+                cp -r "$tmpdir/kms/package/network/vlmcsd" "${DOWNLOAD_DIR}/vlmcsd" 2>/dev/null || true
+              }
+              rm -rf "$tmpdir"
+            fi
+            
+            # adblock-fast
+            if tmpdir=$(mktemp -d); then
+              git clone --depth 1 https://github.com/openwrt/packages "$tmpdir/packages" 2>/dev/null && {
+                cp -r "$tmpdir/packages/net/adblock-fast" "${DOWNLOAD_DIR}/adblock-fast" 2>/dev/null || true
+              }
+              rm -rf "$tmpdir"
+            fi
+            
+            # jell
+            if tmpdir=$(mktemp -d); then
+              git clone --depth 1 https://github.com/kenzok8/jell "$tmpdir/jell" 2>/dev/null && {
+                for item in luci-app-aria2 luci-app-ipsec-server luci-app-pptpd webdav2 luci-app-msd_lite luci-app-onliner msd_lite unishare luci-app-unishare luci-app-rtbwmon luci-app-kodexplorer; do
+                  if [ -d "$tmpdir/jell/$item" ]; then
+                    cp -r "$tmpdir/jell/$item" "${DOWNLOAD_DIR}/$item"
+                  fi
+                done
+              }
+              rm -rf "$tmpdir"
+            fi
+          }
+          
+          # 执行并行下载
+          download_batch batch1_keys &
+          download_batch batch2_keys &
+          download_batch batch3_keys &
+          download_batch batch4_keys &
+          download_batch batch5_keys &
+          special_downloads &
+          
+          # 等待所有后台任务完成并检查状态
+          FAILED=0
+          for job in $(jobs -p); do
+            wait $job || ((FAILED++))
           done
-
-          # 开始并行克隆
-          {
-            git_clone https://github.com/kiddin9/luci-app-dnsfilter luci-app-dnsfilter
-            git_clone https://github.com/kiddin9/aria2 aria2
-            git_clone https://github.com/kiddin9/autoshare autoshare
-            git_clone https://github.com/kiddin9/luci-app-wizard luci-app-wizard
-          } &
-
-          {
-            git_clone https://github.com/riverscn/openwrt-iptvhelper openwrt-iptvhelper
-            git_clone https://github.com/kongfl888/luci-app-timedreboot luci-app-timedreboot
-            git_clone https://github.com/destan19/OpenAppFilter OpenAppFilter
-            git_clone https://github.com/upcliujie/luci-app-tcpdump luci-app-tcpdump
-            #git_clone https://github.com/Natduki/luci-app-sqm-controller luci-app-sqm-controller
-            git_clone https://github.com/YusDyr/luci-app-trafficctl luci-app-trafficctl
-          } &
-
-          {
-            git_clone https://github.com/sirpdboy/luci-app-timecontrol luci-app-timecontrol
-            git_clone https://github.com/sirpdboy/luci-app-advancedplus luci-app-advancedplus
-            git_clone https://github.com/gdy666/luci-app-lucky luci-app-lucky
-            git_clone https://github.com/sirpdboy/luci-app-partexp luci-app-partexp
-            git_clone https://github.com/sirpdboy/netspeedtest netspeedtest
-            git_clone https://github.com/sirpdboy/luci-app-watchdog luci-app-watchdog
-            git_clone https://github.com/sirpdboy/luci-app-parentcontrol luci-app-parentcontrol
-            git_clone https://github.com/sirpdboy/luci-app-eqosplus luci-app-eqosplus
-            git_clone https://github.com/sirpdboy/luci-app-taskplan luci-app-taskplan
-            git_clone https://github.com/sirpdboy/luci-app-netwizard luci-app-netwizar
-            git_clone https://github.com/qimaoww/luci-app-lanspeed luci-app-lanspeed
-          } &
-
-          {
-            git_clone https://github.com/brvphoenix/luci-app-wrtbwmon luci-app-wrtbwmon
-            git_clone https://github.com/brvphoenix/wrtbwmon wrtbwmon
-            git_clone https://github.com/sbwml/luci-app-mosdns luci-app-mosdns
-            git_clone https://github.com/UnblockNeteaseMusic/luci-app-unblockneteasemusic luci-app-unblockneteasemusic
-            git_clone https://github.com/sbwml/luci-app-quickfile luci-app-quickfile
-            git_clone https://github.com/mossdef-org/luci-app-adblock-fast luci-app-adblock-fast
-            
-            # 特殊处理 vlmcsd
-            git clone --depth 1 https://github.com/gaoderby/luci-app-kms tmp_kms
-            cp -r tmp_kms/luci/applications/luci-app-vlmcsd . 2>/dev/null || true
-            cp -r tmp_kms/package/network/vlmcsd . 2>/dev/null || true
-            rm -rf tmp_kms
-            
-            # 特殊处理 adblock-fast
-            git clone --depth 1 https://github.com/openwrt/packages tmp_openwrt_pkg
-            cp -r tmp_openwrt_pkg/net/adblock-fast . 2>/dev/null || true
-            rm -rf tmp_openwrt_pkg
-          } &
-
-          {
-            git_clone https://github.com/tty228/luci-app-wechatpush luci-app-wechatpush
-            git_clone https://github.com/ZeaKyX/speedtest-web speedtest-web
-            git_clone https://github.com/ZeaKyX/luci-app-speedtest-web luci-app-speedtest-web
-            git_clone https://github.com/vernesong/OpenClash OpenClash
-            git_clone https://github.com/ilxp/luci-app-ikoolproxy luci-app-ikoolproxy
-            git_clone https://github.com/EasyTier/luci-app-easytier luci-app-easytier
-            git_clone https://github.com/stackia/rtp2httpd rtp2httpd
-            git_clone https://github.com/jerrykuku/luci-app-argon-config luci-app-argon-config
-            git_clone https://github.com/jerrykuku/luci-theme-argon luci-theme-argon
-            git_clone https://github.com/gaoyaxuan/luci-app-pushbot luci-app-pushbot
-            git_clone https://github.com/nooblk-98/luci-app-netstat luci-app-netstat
-            git_clone https://github.com/nooblk-98/luci-theme-noobwrt luci-theme-noobwrt
-            #git_clone https://github.com/muink/luci-app-tinyfilemanager luci-app-tinyfilemanager
-          } &
-
-          {
-            git_clone https://github.com/kenzok78/luci-app-adguardhome luci-app-adguardhome
-            git_clone https://github.com/pymumu/luci-app-smartdns luci-app-smartdns
-            git_clone https://github.com/pymumu/openwrt-smartdns smartdns
-            git_clone https://github.com/Openwrt-Passwall/openwrt-passwall2 openwrt-passwall2
-            git_clone https://github.com/Openwrt-Passwall/openwrt-passwall openwrt-passwall
-            git_clone https://github.com/timsaya/luci-app-bandix luci-app-bandix
-            git_clone https://github.com/timsaya/openwrt-bandix openwrt-bandix
-            git_clone https://github.com/timsaya/luci-app-bandix-plus luci-app-bandix-plus
-            git_clone https://github.com/timsaya/openwrt-bandix-plus openwrt-bandix-plus
-            git_clone https://github.com/huchd0/luci-app-netwiz luci-app-netwiz
-            git_clone https://github.com/tpxcer/luci-app-minigate luci-app-minigate
-    
-          } &
-
-          {
-            # 特殊处理 jell
-            mkdir -p /tmp/jell
-            cd /tmp/jell
-            git clone --depth 1 https://github.com/kenzok8/jell .
-            mv -f luci-app-aria2 luci-app-ipsec-server luci-app-pptpd webdav2 luci-app-msd_lite luci-app-onliner msd_lite unishare luci-app-unishare luci-app-rtbwmon luci-app-kodexplorer ${GITHUB_WORKSPACE}/ 2>/dev/null || true
-            cd ${GITHUB_WORKSPACE}
-            rm -rf /tmp/jell
-          } &
-
-          # 等待所有后台任务完成
-          wait
           
-          # 清理克隆的仓库中的git目录（但保留主仓库的.git）
-          find . -maxdepth 2 -type d -name ".git" -not -path "./.git" -exec rm -rf {} + 2>/dev/null || true
-          # 清理README和LICENSE文件（但保留主README.md）
-          find . -maxdepth 2 -type f -name "README.md" -not -path "./README.md" -exec rm -f {} + 2>/dev/null || true
-          find . -maxdepth 2 -type f -name "LICENSE" -exec rm -f {} + 2>/dev/null || true
+          if [ $FAILED -gt 0 ]; then
+            echo "⚠️ 警告: $FAILED 个并行任务失败"
+          fi
           
-          echo "✅ 下载完成，当前目录内容："
+          # 清理旧文件并移动新文件
+          echo "📦 准备更新文件..."
+          find . -maxdepth 1 ! -name '.' ! -name '..' ! -name '.git' ! -name '.github' ! -name 'README.md' ! -name '.gitignore' -exec rm -rf {} +
+          
+          # 移动下载的文件
+          if [ -d "$DOWNLOAD_DIR" ]; then
+            cp -r "$DOWNLOAD_DIR"/* . 2>/dev/null || true
+          fi
+          
+          # 清理 .git 目录
+          find . -mindepth 2 -type d -name ".git" -exec rm -rf {} + 2>/dev/null || true
+          find . -mindepth 2 -type f -name "README.md" ! -path "./README.md" -delete 2>/dev/null || true
+          find . -mindepth 2 -type f -name "LICENSE" -delete 2>/dev/null || true
+          
+          echo "✅ 下载完成"
+          echo "当前目录内容："
           ls -la
 
-      - name: 提交并推送更新 + 写入 README.md
+      - name: 提交并推送更新
         run: |
-          # 确保在git仓库中
           if [ ! -d ".git" ]; then
             echo "❌ 错误：.git 目录不存在"
-            echo "当前目录内容："
             ls -la
             exit 1
           fi
           
-          # 创建或更新 README.md
-          touch README.md
-          
-          # 添加所有更改
-          git add -A
-          
-          # 检查是否有更改
+          # 检查更改
           CHANGES=$(git status --porcelain)
           
-          if [ -n "$CHANGES" ]; then
-            echo "📤 检测到更新，开始提交"
-            echo "====================================="
-            echo "$CHANGES"
-            echo "====================================="
-
-            FILE_COUNT=$(echo "$CHANGES" | wc -l)
-            UPDATE_TIME=$(date '+%Y-%m-%d %H:%M:%S')
-            # 提取更新的目录名
-            UPDATE_PLUGINS=$(echo "$CHANGES" | awk '{print $2}' | grep -v '^README.md$' | grep -v '^\.git' | head -20 | sed 's|^\./||' | cut -d'/' -f1 | sort -u)
-
-            # 生成新的 README
-            {
-              echo "## 📦 自用包AI最近自动更新"
-              echo "- 更新时间：$UPDATE_TIME"
-              echo "- 更新文件数：$FILE_COUNT"
-              echo "- 更新插件："
-              if [ -n "$UPDATE_PLUGINS" ]; then
-                echo "$UPDATE_PLUGINS" | while read p; do 
-                  if [ -n "$p" ]; then
-                    echo "  - $p"
-                  fi
-                done
-              else
-                echo "  - 无插件更新"
-              fi
-              echo "---"
-              echo
-              # 保留原有的 README 内容（如果存在）
-              if [ -f "README.md" ] && [ -s "README.md" ]; then
-                tail -n +7 README.md 2>/dev/null || true
-              fi
-            } > README.tmp && mv README.tmp README.md
-
-            git add README.md
-            
-            # 提交更改
-            git commit -m "📦 自动更新 $UPDATE_TIME"
-            
-            # 推送
-            git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main
-            
-            echo "✅ 推送成功"
-          else
-            echo "ℹ️ 无文件变更"
+          if [ -z "$CHANGES" ]; then
+            echo "ℹ️ 无文件变更，跳过提交"
             exit 0
           fi
+          
+          echo "📤 检测到更新："
+          echo "$CHANGES"
+          
+          # 生成更新时间
+          UPDATE_TIME=$(TZ=Asia/Shanghai date '+%Y-%m-%d %H:%M:%S')
+          FILE_COUNT=$(echo "$CHANGES" | wc -l)
+          
+          # 提取更新的插件名
+          UPDATE_PLUGINS=$(echo "$CHANGES" | awk '{print $2}' | grep -v '^README.md$' | head -20 | sed 's|^\./||' | cut -d'/' -f1 | sort -u | sed '/^$/d')
+          
+          # 生成 README
+          cat > README.md << EOF
+          ## 📦 自用包自动更新
+          
+          - **更新时间**：$UPDATE_TIME
+          - **更新文件数**：$FILE_COUNT
+          - **更新插件**：
+          $(if [ -n "$UPDATE_PLUGINS" ]; then
+            echo "$UPDATE_PLUGINS" | while read -r p; do
+              [ -n "$p" ] && echo "  - \`$p\`"
+            done
+          else
+            echo "  - 配置文件更新"
+          fi)
+          
+          ---
+          
+          本仓库由 GitHub Actions 自动维护，每13小时检查一次更新。
+          EOF
+          
+          # 提交所有更改
+          git add -A
+          git commit -m "📦 自动更新 - $UPDATE_TIME" || {
+            echo "⚠️ 提交失败或没有变更"
+            exit 0
+          }
+          
+          # 推送（最多重试3次）
+          for i in {1..3}; do
+            if git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main; then
+              echo "✅ 推送成功"
+              exit 0
+            fi
+            echo "⚠️ 推送失败，第${i}次重试..."
+            sleep $((RANDOM % 10 + 5))
+            git pull --rebase https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git main
+          done
+          
+          echo "❌ 推送失败，请手动检查"
+          exit 1
