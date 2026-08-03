@@ -95,7 +95,7 @@ jobs:
             ["speedtest-web"]="https://github.com/ZeaKyX/speedtest-web"
             ["luci-app-speedtest-web"]="https://github.com/ZeaKyX/luci-app-speedtest-web"
             ["OpenClash"]="https://github.com/vernesong/OpenClash"
-            ["luci-app-cpu-status"]="https://github.com/gSpotx2f/luci-app-cpu-status"
+            #["luci-app-cpu-status"]="https://github.com/gSpotx2f/luci-app-cpu-status"
             ["luci-app-ikoolproxy"]="https://github.com/ilxp/luci-app-ikoolproxy"
             ["luci-app-easytier"]="https://github.com/EasyTier/luci-app-easytier"
             ["rtp2httpd"]="https://github.com/stackia/rtp2httpd"
@@ -104,11 +104,11 @@ jobs:
             ["luci-app-pushbot"]="https://github.com/gaoyaxuan/luci-app-pushbot"
             ["luci-app-netstat"]="https://github.com/nooblk-98/luci-app-netstat"
             ["luci-theme-noobwrt"]="https://github.com/nooblk-98/luci-theme-noobwrt"
-            ["luci-app-tinyfilemanager"]="https://github.com/muink/luci-app-tinyfilemanager"
+            #["luci-app-tinyfilemanager"]="https://github.com/muink/luci-app-tinyfilemanager"
             ["luci-app-adguardhome"]="https://github.com/kenzok78/luci-app-adguardhome"
             ["luci-app-smartdns"]="https://github.com/pymumu/luci-app-smartdns"
             ["smartdns"]="https://github.com/pymumu/openwrt-smartdns"
-            ["openwrt-passwall2"]="https://github.com/Openwrt-Passwall/openwrt-passwall2"
+           #["openwrt-passwall2"]="https://github.com/Openwrt-Passwall/openwrt-passwall2"
             ["openwrt-passwall"]="https://github.com/Openwrt-Passwall/openwrt-passwall"
             ["luci-app-bandix"]="https://github.com/timsaya/luci-app-bandix"
             ["openwrt-bandix"]="https://github.com/timsaya/openwrt-bandix"
@@ -116,7 +116,7 @@ jobs:
             ["openwrt-bandix-plus"]="https://github.com/timsaya/openwrt-bandix-plus"
             ["luci-app-netwiz"]="https://github.com/huchd0/luci-app-netwiz"
             ["luci-app-minigate"]="https://github.com/tpxcer/luci-app-minigate"
-            ["luci-app-mosdns-panel"]="https://github.com/MayflyDestiny/luci-app-mosdns-panel"
+           #["luci-app-mosdns-panel"]="https://github.com/MayflyDestiny/luci-app-mosdns-panel"
           )
           
           special_downloads() {
