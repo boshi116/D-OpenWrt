@@ -55,14 +55,6 @@ function hostLabel(mac, hosts) {
 	return item.name ? '%s (%s)'.format(item.name, mac) : (item.ip ? '%s (%s)'.format(item.ip, mac) : mac);
 }
 
-// 只获取设备显示名（不包含MAC地址）
-function getDeviceDisplayName(mac, hosts) {
-	if (mac === '00:00:00:00:00:00') return _('Interface total');
-	var item = (hosts || []).find(function(h) { return h.mac === mac; });
-	if (!item) return mac;
-	return item.name || item.ip || mac;
-}
-
 function rangeFor(value) {
 	var end = Math.floor(Date.now() / 1000), seconds = Number(value || 86400);
 	return { start: end - seconds, end: end };
@@ -87,7 +79,7 @@ function totalOf(d) {
 }
 
 function makeChart(points, bucket, mode, detail) {
-	var width = 1000, height = 234, left = 72, right = 18, top = 18, bottom = 36, center = (top + height - bottom) / 2;
+	var width = 1000, height = 390, left = 72, right = 18, top = 24, bottom = 46, center = (top + height - bottom) / 2;
 	var colors = { rx4: '#1677ff', rx6: '#722ed1', tx4: '#36cfc9', tx6: '#9c6ade' };
 	if (!points || !points.length)
 		return E('div', { 'class': 'ts-empty' }, _('No data in this time range yet.'));
@@ -112,7 +104,7 @@ function makeChart(points, bucket, mode, detail) {
 	for (var grid = -2; grid <= 2; grid++) {
 		var gy = center + grid * (height - top - bottom) / 4;
 		children.push(createSVG('line', { x1: left, y1: gy, x2: width - right, y2: gy, stroke: 'currentColor', 'stroke-opacity': grid === 0 ? '.28' : '.1', 'stroke-dasharray': grid === 0 ? '' : '4 4' }));
-		children.push(createSVG('text', { x: left - 8, y: gy + 4, 'font-size': 10, 'text-anchor': 'end', fill: 'currentColor' }, [ (grid < 0 ? '' : grid > 0 ? '-' : '') + (grid === 0 ? (mode === 'rate' ? '0 bit/s' : '0 B') : display(max * Math.abs(grid) / 2)) ]));
+		children.push(createSVG('text', { x: left - 8, y: gy + 4, 'font-size': 11, 'text-anchor': 'end', fill: 'currentColor' }, [ (grid < 0 ? '' : grid > 0 ? '-' : '') + (grid === 0 ? (mode === 'rate' ? '0 bit/s' : '0 B') : display(max * Math.abs(grid) / 2)) ]));
 	}
 	if (detail) {
 		children.push(area(function(p) { return yRx(value(p, 'rx4')); }, function() { return center; }, colors.rx4, '.82'));
@@ -123,10 +115,10 @@ function makeChart(points, bucket, mode, detail) {
 		children.push(area(function(p) { return yRx(value(p, 'rx4') + value(p, 'rx6')); }, function() { return center; }, colors.rx4, '.82'));
 		children.push(area(function(p) { return yTx(value(p, 'tx4') + value(p, 'tx6')); }, function() { return center; }, colors.tx4, '.8'));
 	}
-	children.push(createSVG('text', { x: left, y: 13, 'font-size': 10, fill: 'currentColor' }, [ _('Receive') ]));
-	children.push(createSVG('text', { x: left, y: height - bottom + 16, 'font-size': 10, fill: 'currentColor' }, [ _('Transmit') ]));
-	children.push(createSVG('text', { x: left, y: height - 6, 'font-size': 10, 'text-anchor': 'start', fill: 'currentColor' }, [ new Date(minT * 1000).toLocaleString() ]));
-	children.push(createSVG('text', { x: width - right, y: height - 6, 'font-size': 10, 'text-anchor': 'end', fill: 'currentColor' }, [ new Date(maxT * 1000).toLocaleString() ]));
+	children.push(createSVG('text', { x: left, y: 15, 'font-size': 11, fill: 'currentColor' }, [ _('Receive') ]));
+	children.push(createSVG('text', { x: left, y: height - bottom + 18, 'font-size': 11, fill: 'currentColor' }, [ _('Transmit') ]));
+	children.push(createSVG('text', { x: left, y: height - 8, 'font-size': 11, 'text-anchor': 'start', fill: 'currentColor' }, [ new Date(minT * 1000).toLocaleString() ]));
+	children.push(createSVG('text', { x: width - right, y: height - 8, 'font-size': 11, 'text-anchor': 'end', fill: 'currentColor' }, [ new Date(maxT * 1000).toLocaleString() ]));
 	var crosshair = createSVG('line', { y1: top, y2: height - bottom, stroke: '#64748b', 'stroke-width': 1, 'stroke-dasharray': '4 3', style: 'display:none' });
 	children.push(crosshair);
 	var svg = createSVG('svg', { viewBox: '0 0 %s %s'.format(width, height), 'class': 'ts-chart', role: 'img' }, children);
@@ -176,73 +168,7 @@ return view.extend({
 		this.protocolDetail = true;
 
 		var root = E('div', { 'class': 'cbi-map ts-app' }, [
-			E('style', {}, `
-				.ts-toolbar{display:flex;gap:.7rem;align-items:end;flex-wrap:wrap;margin:1rem 0;padding:1rem;border:1px solid rgba(127,127,127,.2);border-radius:9px}
-				.ts-toolbar label{display:flex;flex-direction:column;gap:.25rem}
-				.ts-toolbar .ts-custom{display:none}
-				.ts-segment{display:inline-flex;border:1px solid rgba(127,127,127,.3);border-radius:6px;overflow:hidden}
-				.ts-segment button{border:0;border-radius:0;background:transparent;padding:.48rem .8rem;cursor:pointer}
-				.ts-segment button.active{background:#1677ff;color:#fff}
-				.ts-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.8rem;margin:1rem 0}
-				.ts-card,.ts-panel{padding:1rem;border:1px solid rgba(127,127,127,.22);border-radius:9px;background:rgba(127,127,127,.025)}
-				.ts-card strong{display:block;font-size:1.45rem;margin-top:.35rem}
-				.ts-panel{margin:1rem 0}
-				.ts-panel h3{margin:0 0 .8rem}
-				.ts-chart-wrap{position:relative}
-				.ts-chart{width:100%;height:auto;min-height:168px;color:#64748b}
-				.ts-tooltip{position:absolute;z-index:2;min-width:205px;padding:.7rem;background:rgba(255,255,255,.96);color:#1f2937;border:1px solid #d1d5db;border-radius:7px;box-shadow:0 5px 18px rgba(0,0,0,.16);pointer-events:none}
-				.ts-tooltip strong{display:block;margin-bottom:.4rem}
-				.ts-tooltip div{display:grid;grid-template-columns:1rem 1fr auto;gap:.3rem;align-items:center;margin:.2rem 0}
-				.ts-tooltip b{font-weight:600}
-				.ts-legend{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;margin-top:.5rem}
-				.ts-legend-dot{display:inline-block;width:.72rem;height:.72rem;border-radius:3px;margin-right:.35rem}
-				.ts-empty{padding:2rem 1rem;text-align:center;opacity:.7}
-				.ts-state{display:inline-block;padding:.2rem .55rem;border-radius:999px;background:#d9f7be;color:#135200}
-				.ts-state.bad{background:#fff1f0;color:#a8071a}
-				.ts-note{opacity:.75}
-				.ts-table-wrap{overflow:auto}
-
-				/* Device traffic ranking 布局 - 左右表格 */
-				.ts-devices{display:grid;grid-template-columns:minmax(340px,1fr) minmax(460px,2fr);gap:2.5rem;align-items:start}
-
-				/* 左侧排名表格 - 全部显示，无滚动条 */
-				.ts-ranking-wrap{background:rgba(127,127,127,.03);border-radius:8px;overflow:hidden;border:1px solid rgba(127,127,127,.1)}
-				.ts-rank-table{width:100%;border-collapse:collapse;font-size:.85rem}
-				.ts-rank-table th,.ts-rank-table td{padding:.45rem .7rem;text-align:left;white-space:nowrap}
-				.ts-rank-table thead th{position:sticky;top:0;background:#f8fafc;border-bottom:2px solid rgba(127,127,127,.12);font-weight:600;color:#475569;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;z-index:2}
-				.ts-rank-table tbody tr{border-bottom:1px solid rgba(127,127,127,.05);transition:background .15s}
-				.ts-rank-table tbody tr:hover{background:rgba(22,119,255,.05)}
-				.ts-rank-table tbody tr:last-child{border-bottom:none}
-				.ts-rank-rank{width:42px;text-align:center;font-weight:700;font-size:.85rem}
-				.ts-rank-name{min-width:100px;font-weight:500;font-size:.85rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:160px}
-				.ts-rank-bar{width:100%;padding:.15rem .5rem}
-				.ts-rank-track{height:.4rem;background:rgba(127,127,127,.1);border-radius:99px;overflow:hidden;min-width:60px}
-				.ts-rank-fill{height:100%;border-radius:99px;transition:width .6s ease}
-				.ts-rank-total{width:90px;text-align:right;font-weight:600;font-size:.85rem;font-variant-numeric:tabular-nums;white-space:nowrap}
-
-				/* 右侧设备表格 */
-				.ts-device-table{width:100%;border-collapse:collapse;font-size:.85rem;border:1px solid rgba(127,127,127,.08);border-radius:8px;overflow:hidden}
-				.ts-device-table th,.ts-device-table td{padding:.45rem .7rem;text-align:left;white-space:nowrap}
-				.ts-device-table thead th{border-bottom:2px solid rgba(127,127,127,.12);font-weight:600;color:#475569;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;background:rgba(127,127,127,.03)}
-				.ts-device-table tbody tr{border-bottom:1px solid rgba(127,127,127,.05);transition:background .15s}
-				.ts-device-table tbody tr:hover{background:rgba(22,119,255,.04)}
-				.ts-device-table tbody tr:last-child{border-bottom:none}
-				.ts-device-table .ts-numeric{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-				.ts-col-device{min-width:140px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px}
-				.ts-col-received{min-width:85px}
-				.ts-col-transmitted{min-width:85px}
-				.ts-col-total{min-width:85px;font-weight:600}
-
-				/* 响应式 */
-				@media(max-width:900px){
-					.ts-devices{grid-template-columns:1fr;gap:1.5rem}
-					.ts-rank-table{font-size:.78rem}
-					.ts-rank-rank{width:32px;font-size:.75rem}
-					.ts-rank-total{width:75px}
-					.ts-col-device{min-width:100px}
-					.ts-chart{min-height:126px}
-				}
-			`),
+			E('style', {}, '.ts-toolbar{display:flex;gap:.7rem;align-items:end;flex-wrap:wrap;margin:1rem 0;padding:1rem;border:1px solid rgba(127,127,127,.2);border-radius:9px}.ts-toolbar label{display:flex;flex-direction:column;gap:.25rem}.ts-toolbar .ts-custom{display:none}.ts-segment{display:inline-flex;border:1px solid rgba(127,127,127,.3);border-radius:6px;overflow:hidden}.ts-segment button{border:0;border-radius:0;background:transparent;padding:.48rem .8rem}.ts-segment button.active{background:#1677ff;color:#fff}.ts-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.8rem;margin:1rem 0}.ts-card,.ts-panel{padding:1rem;border:1px solid rgba(127,127,127,.22);border-radius:9px;background:rgba(127,127,127,.025)}.ts-card strong{display:block;font-size:1.45rem;margin-top:.35rem}.ts-panel{margin:1rem 0}.ts-panel h3{margin:0 0 .8rem}.ts-chart-wrap{position:relative}.ts-chart{width:100%;height:auto;min-height:280px;color:#64748b}.ts-tooltip{position:absolute;z-index:2;min-width:205px;padding:.7rem;background:rgba(255,255,255,.96);color:#1f2937;border:1px solid #d1d5db;border-radius:7px;box-shadow:0 5px 18px rgba(0,0,0,.16);pointer-events:none}.ts-tooltip strong{display:block;margin-bottom:.4rem}.ts-tooltip div{display:grid;grid-template-columns:1rem 1fr auto;gap:.3rem;align-items:center;margin:.2rem 0}.ts-tooltip b{font-weight:600}.ts-legend{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center}.ts-legend-dot{display:inline-block;width:.72rem;height:.72rem;border-radius:3px;margin-right:.35rem}.ts-empty{padding:4rem 1rem;text-align:center;opacity:.7}.ts-state{display:inline-block;padding:.2rem .55rem;border-radius:999px;background:#d9f7be;color:#135200}.ts-state.bad{background:#fff1f0;color:#a8071a}.ts-note{opacity:.75}.ts-table-wrap{overflow:auto}.ts-devices{display:grid;grid-template-columns:minmax(250px,.8fr) minmax(420px,1.7fr);gap:1.2rem}.ts-rank-row{display:grid;grid-template-columns:minmax(100px,1fr) 2fr auto;gap:.6rem;align-items:center;margin:.75rem 0}.ts-rank-track{height:.55rem;background:rgba(127,127,127,.15);border-radius:99px;overflow:hidden}.ts-rank-fill{height:100%;background:#1677ff;border-radius:99px}@media(max-width:900px){.ts-devices{grid-template-columns:1fr}.ts-chart{min-height:220px}}'),
 			E('h2', {}, _('Traffic Statistics')),
 			E('p', { 'class': 'ts-note' }, _('Receive and transmit follow the configured perspective. Counters are split by IPv4 and IPv6.')),
 			E('div', { id: 'ts-status' }),
@@ -357,7 +283,6 @@ return view.extend({
 		var devices = (this.query.devices || []).slice().sort(function(a, b) { return totalOf(b) - totalOf(a); });
 		var seconds = Math.max(bucket, Number(this.query.end || this.range.end) - Number(this.query.start || this.range.start)), average = totalOf(t) * 8 / seconds, peak = 0;
 		points.forEach(function(p) { peak = Math.max(peak, totalOf(p) * 8 / Math.max(1, bucket)); });
-
 		var cards = E('div', { 'class': 'ts-cards' }, [
 			E('div', { 'class': 'ts-card' }, [ _('Received'), E('strong', {}, formatBytes(Number(t.rx4 || 0) + Number(t.rx6 || 0))), E('small', {}, 'IPv4 %s · IPv6 %s'.format(formatBytes(t.rx4), formatBytes(t.rx6))) ]),
 			E('div', { 'class': 'ts-card' }, [ _('Transmitted'), E('strong', {}, formatBytes(Number(t.tx4 || 0) + Number(t.tx6 || 0))), E('small', {}, 'IPv4 %s · IPv6 %s'.format(formatBytes(t.tx4), formatBytes(t.tx6))) ]),
@@ -365,97 +290,20 @@ return view.extend({
 			E('div', { 'class': 'ts-card' }, [ _('Average rate'), E('strong', {}, formatRate(average)), E('small', {}, _('Across the selected range')) ]),
 			E('div', { 'class': 'ts-card' }, [ _('Peak rate'), E('strong', {}, formatRate(peak)), E('small', {}, _('Highest time bucket')) ])
 		]);
-
+		var rows = devices.map(function(d) {
+			return E('tr', {}, [ E('td', {}, hostLabel(d.mac, this.status.hosts)), E('td', {}, formatBytes(Number(d.rx4) + Number(d.rx6))), E('td', {}, formatBytes(Number(d.tx4) + Number(d.tx6))), E('td', {}, formatBytes(totalOf(d))) ]);
+		}, this);
 		var maxDevice = devices.length ? totalOf(devices[0]) : 1;
-
-		// 20种不同的醒目颜色
-		var rankColors = [
-			'#f5222d', '#fa8c16', '#faad14', '#1677ff', '#52c41a',
-			'#eb2f96', '#13c2c2', '#722ed1', '#fa541c', '#2f54eb',
-			'#a0d911', '#f759ab', '#1890ff', '#7cb305', '#d4380d',
-			'#096dd9', '#389e0d', '#d4b106', '#c41d7f', '#08979c'
-		];
-
-		// 左侧排名表格 - 显示所有设备，带流量条
-		var rankRows = devices.slice(0, 100).map(function(d, index) {
-			var pct = maxDevice > 0 ? (totalOf(d) / maxDevice * 100).toFixed(1) : 0;
-			var color = rankColors[index % rankColors.length];
-			var label = '#%s'.format(index + 1);
-			var displayName = getDeviceDisplayName(d.mac, this.status.hosts);
-			return E('tr', { 'class': 'ts-rank-row' }, [
-				E('td', { 'class': 'ts-rank-rank', style: 'color:%s;font-weight:700'.format(color) }, label),
-				E('td', { 'class': 'ts-rank-name' }, displayName),
-				E('td', { 'class': 'ts-rank-bar' }, E('div', { 'class': 'ts-rank-track' }, E('div', { 'class': 'ts-rank-fill', style: 'width:%s%%;background:%s'.format(pct, color) }))),
-				E('td', { 'class': 'ts-rank-total' }, formatBytes(totalOf(d)))
-			]);
-		}, this);
-
-		var ranking = E('div', { 'class': 'ts-ranking-wrap' }, [
-			E('table', { 'class': 'ts-rank-table' }, [
-				E('thead', {}, E('tr', { 'class': 'ts-rank-header' }, [
-					E('th', { 'class': 'ts-rank-rank' }, '#'),
-					E('th', { 'class': 'ts-rank-name' }, _('Device')),
-					E('th', { 'class': 'ts-rank-bar' }, _('Traffic')),
-					E('th', { 'class': 'ts-rank-total' }, _('Total'))
-				])),
-				E('tbody', {}, rankRows.length ? rankRows : [
-					E('tr', {}, E('td', { colspan: 4, 'class': 'ts-empty' }, _('No devices')))
-				])
-			])
-		]);
-
-		// 右侧完整设备表格
-		var tableRows = devices.map(function(d) {
-			var displayName = getDeviceDisplayName(d.mac, this.status.hosts);
-			return E('tr', { 'class': 'ts-table-row' }, [
-				E('td', { 'class': 'ts-col-device' }, displayName),
-				E('td', { 'class': 'ts-col-received ts-numeric' }, formatBytes(Number(d.rx4 || 0) + Number(d.rx6 || 0))),
-				E('td', { 'class': 'ts-col-transmitted ts-numeric' }, formatBytes(Number(d.tx4 || 0) + Number(d.tx6 || 0))),
-				E('td', { 'class': 'ts-col-total ts-numeric' }, formatBytes(totalOf(d)))
-			]);
-		}, this);
-
-		var tableHeader = E('thead', {}, E('tr', { 'class': 'ts-table-header' }, [
-			E('th', { 'class': 'ts-col-device' }, _('Device')),
-			E('th', { 'class': 'ts-col-received ts-numeric' }, _('Received')),
-			E('th', { 'class': 'ts-col-transmitted ts-numeric' }, _('Transmitted')),
-			E('th', { 'class': 'ts-col-total ts-numeric' }, _('Total'))
-		]));
-
-		var tableBody = E('tbody', {}, tableRows.length ? tableRows : [
-			E('tr', {}, E('td', { colspan: 4, 'class': 'ts-empty' }, _('No devices in this range.')))
-		]);
-
-		var table = E('div', { 'class': 'ts-table-wrap' },
-			E('table', { 'class': 'table ts-device-table' }, [ tableHeader, tableBody ])
-		);
-
-		// 调整顺序：先显示摘要卡片，再显示排名表格，最后显示流量趋势图
-		dom.content(this.root.querySelector('#ts-results'), [
-			cards,
-			E('div', { 'class': 'ts-panel' }, [
-				E('h3', {}, _('Device traffic ranking')),
-				E('div', { 'class': 'ts-devices' }, [ ranking, table ])
-			]),
-			E('div', { 'class': 'ts-panel' }, [ E('h3', {}, _('Traffic trend')), makeChart(points, bucket, this.chartMode, this.protocolDetail) ])
-		]);
+		var ranking = E('div', {}, devices.slice(0, 5).map(function(d) {
+			return E('div', { 'class': 'ts-rank-row' }, [ E('span', {}, hostLabel(d.mac, this.status.hosts)), E('div', { 'class': 'ts-rank-track' }, E('div', { 'class': 'ts-rank-fill', style: 'width:%s%%'.format((totalOf(d) / maxDevice * 100).toFixed(1)) })), E('b', {}, formatBytes(totalOf(d))) ]);
+		}, this));
+		var table = E('div', { 'class': 'ts-table-wrap' }, E('table', { 'class': 'table' }, [ E('tr', { 'class': 'tr table-titles' }, [ E('th', {}, _('Device')), E('th', {}, _('Received')), E('th', {}, _('Transmitted')), E('th', {}, _('Total')) ]) ].concat(rows.length ? rows : [ E('tr', {}, E('td', { colspan: 4 }, _('No devices in this range.'))) ])));
+		dom.content(this.root.querySelector('#ts-results'), [ cards, E('div', { 'class': 'ts-panel' }, [ E('h3', {}, _('Traffic trend')), makeChart(points, bucket, this.chartMode, this.protocolDetail) ]), E('div', { 'class': 'ts-panel' }, [ E('h3', {}, _('Device traffic ranking')), E('div', { 'class': 'ts-devices' }, [ ranking, table ]) ]) ]);
 	},
 
 	confirmClear: function() {
 		if (!this.group) return;
-		ui.showModal(_('Clear history?'), [
-			E('p', {}, _('All saved history for the selected interface group will be deleted. Live counters are not interrupted.')),
-			E('div', { 'class': 'right' }, [
-				E('button', { 'class': 'btn', click: ui.hideModal }, _('Cancel')),
-				' ',
-				E('button', { 'class': 'btn cbi-button-negative', click: ui.createHandlerFn(this, function() {
-					return callClear(this.group).then(function() {
-						ui.hideModal();
-						return this.refresh();
-					}.bind(this));
-				}) }, _('Clear'))
-			])
-		]);
+		ui.showModal(_('Clear history?'), [ E('p', {}, _('All saved history for the selected interface group will be deleted. Live counters are not interrupted.')), E('div', { 'class': 'right' }, [ E('button', { 'class': 'btn', click: ui.hideModal }, _('Cancel')), ' ', E('button', { 'class': 'btn cbi-button-negative', click: ui.createHandlerFn(this, function() { return callClear(this.group).then(function() { ui.hideModal(); return this.refresh(); }.bind(this)); }) }, _('Clear')) ]) ]);
 	},
 
 	handleSaveApply: null,
