@@ -1,0 +1,108 @@
+'use strict';
+'require view';
+'require form';
+'require network';
+'require uci';
+
+return view.extend({
+	load: function() {
+		return Promise.all([
+			uci.load('traffic_statistic'),
+			network.getNetworks(),
+			network.getDevices()
+		]);
+	},
+
+	render: function(data) {
+		var networks = data[1] || [];
+		var devices = data[2] || [];
+		var m = new form.Map('traffic_statistic', _('Traffic Statistics'),
+			_('Traffic is counted in the kernel and written in batches. Receive and transmit follow the perspective configured for each interface group.'));
+
+		var s = m.section(form.NamedSection, 'main', 'global', _('General settings'));
+		s.anonymous = true;
+
+		var o = s.option(form.Flag, 'enabled', _('Enable'));
+		o.default = o.enabled;
+		o.rmempty = false;
+
+		o = s.option(form.Value, 'storage_path', _('Storage path'));
+		o.default = '/etc/traffic-statistic/data';
+		o.rmempty = false;
+		o.validate = function(sectionId, value) {
+			if (!/^\/(?!.*(?:^|\/)\.\.(?:\/|$))[^|\s]*$/.test(value) ||
+			    /^\/(?:bin|boot|dev|etc|lib|mnt|overlay|proc|root|run|sbin|sys|tmp|usr|var)\/?$/.test(value))
+				return _('Use an absolute path without spaces or parent-directory components.');
+			return true;
+		};
+		o.description = _('Use an external disk path for long retention periods. /tmp is volatile and avoids flash writes.');
+
+		o = s.option(form.Value, 'max_devices', _('Maximum devices per group'));
+		o.default = '256';
+		o.datatype = 'range(16,4096)';
+		o.rmempty = false;
+
+		s = m.section(form.GridSection, 'interface', _('Interface groups'));
+		s.addremove = true;
+		s.anonymous = true;
+		s.nodescriptions = true;
+		s.sectiontitle = function(sectionId) {
+			return uci.get('traffic_statistic', sectionId, 'name') || sectionId;
+		};
+
+		o = s.option(form.Flag, 'enabled', _('Enable'));
+		o.default = o.enabled;
+		o.rmempty = false;
+		o.editable = true;
+
+		o = s.option(form.Value, 'name', _('Display name'));
+		o.placeholder = _('LAN');
+		o.rmempty = false;
+
+		o = s.option(form.MultiValue, 'network', _('Networks / Interfaces'));
+		o.rmempty = false;
+		var seen = {};
+		networks.forEach(function(net) {
+			var name = net.getName();
+			if (!seen[name]) {
+				o.value(name, _('Network: %s').format(name));
+				seen[name] = true;
+			}
+		});
+		devices.forEach(function(dev) {
+			var name = dev.getName();
+			if (!seen[name]) {
+				o.value(name, _('Interface: %s').format(name));
+				seen[name] = true;
+			}
+		});
+
+		o = s.option(form.Value, 'device', _('Device override'));
+		o.placeholder = _('Automatic from network');
+		o.validate = function(sectionId, value) {
+			return !value || /^[A-Za-z0-9_.:-]{1,15}$/.test(value) || _('Use a valid Linux interface name.');
+		};
+		o.description = _('Usually leave empty. Bridge member ports are discovered automatically.');
+
+		o = s.option(form.ListValue, 'role', _('Traffic perspective'));
+		o.value('server', _('Router as server / access point'));
+		o.value('client', _('Router as client'));
+		o.default = 'server';
+		o.rmempty = false;
+		o.description = _('Server mode shows traffic from connected devices: traffic entering the router is transmitted and traffic leaving toward devices is received. Client mode uses the router interface perspective: ingress is received and egress is transmitted.');
+
+		o = s.option(form.Value, 'interval', _('Write interval'));
+		o.default = '300';
+		o.datatype = 'range(60,86400)';
+		o.rmempty = false;
+		o.description = _('Seconds. Longer intervals reduce flash writes.');
+
+		o = s.option(form.Value, 'retention_days', _('Retention'));
+		o.default = '30';
+		o.datatype = 'range(1,3650)';
+		o.rmempty = false;
+		o.description = _('Days of history retained for this group.');
+
+		return m.render();
+	}
+});

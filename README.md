@@ -1,9 +1,10 @@
 ## 📦 自用包自动更新
 
-- **更新时间**：2026-08-04 14:20:49
-- **更新文件数**：5
+- **更新时间**：2026-08-04 22:15:40
+- **更新文件数**：3
 - **更新插件**：
-  - `luci-app-minigate`
+  - `luci-app-kodexplorer`
+  - `luci-app-traffic-statistic`
   - `openwrt-passwall`
 
 ---
