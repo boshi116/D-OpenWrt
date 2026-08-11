@@ -117,7 +117,6 @@ jobs:
             git_clone "https://github.com/kongfl888/luci-app-timedreboot" "luci-app-timedreboot" || true
             git_clone "https://github.com/destan19/OpenAppFilter" "OpenAppFilter" || true
             git_clone "https://github.com/upcliujie/luci-app-tcpdump" "luci-app-tcpdump" || true
-            git_clone "https://github.com/YusDyr/luci-app-trafficctl" "luci-app-trafficctl" || true
             git_clone "https://github.com/IamJasperJ/luci-app-traffic-statistic" "luci-app-traffic-statistic" || true
           ) &
           PID1=$!
