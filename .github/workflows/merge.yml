@@ -100,6 +100,7 @@ jobs:
           (
             # 批次1
             git_clone "https://github.com/kiddin9/luci-app-dnsfilter" "luci-app-dnsfilter" || true
+            git_clone "https://github.com/openwrt/luci/tree/master/applications/luci-app-adblock-fast" "luci-app-adblock-fast" || true
             git_clone "https://github.com/kiddin9/aria2" "aria2" || true
             git_clone "https://github.com/kiddin9/autoshare" "autoshare" || true
             git_clone "https://github.com/kiddin9/luci-app-wizard" "luci-app-wizard" || true
