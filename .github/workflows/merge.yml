@@ -90,6 +90,19 @@ jobs:
                 echo "⚠️ 警告: 处理 jell 失败"
               fi
               rm -rf "$tmpdir"
+              
+              fi
+            
+            echo "🔄 处理特殊仓库: adblock-fast"
+            if tmpdir=$(mktemp -d); then
+              if git clone --depth 1 https://github.com/openwrt/packages "$tmpdir/packages" 2>/dev/null; then
+                cp -r "$tmpdir/packages/net/adblock-fast" "${DOWNLOAD_DIR}/adblock-fast" 2>/dev/null || true
+                echo "✅ 成功处理: adblock-fast"
+              else
+                echo "⚠️ 警告: 处理 adblock-fast 失败"
+              fi
+              rm -rf "$tmpdir"
+              
             fi
             
             return 0
