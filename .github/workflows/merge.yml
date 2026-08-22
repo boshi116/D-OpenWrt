@@ -102,6 +102,27 @@ jobs:
                 echo "⚠️ 警告: 处理 adblock-fast 失败"
               fi
               rm -rf "$tmpdir"
+              fi
+
+            echo "🔄 处理特殊仓库: luci-app-adblock-fast"
+            if tmpdir=$(mktemp -d); then
+              mkdir -p "$tmpdir/luci"
+              pushd "$tmpdir/luci" >/dev/null
+              git init
+              git remote add origin https://github.com/openwrt/luci
+              git config core.sparseCheckout true
+              echo "applications/luci-app-adblock-fast" >> .git/info/sparse-checkout
+              git pull --depth 1 origin master 2>/dev/null
+              popd >/dev/null
+
+              if [ -d "$tmpdir/luci/applications/luci-app-adblock-fast" ];then
+                cp -r "$tmpdir/luci/applications/luci-app-adblock-fast" "${DOWNLOAD_DIR}/luci-app-adblock-fast" 2>/dev/null || true
+                echo "✅ 成功处理: luci-app-adblock-fast"
+              else
+                echo "⚠️ 警告: 处理 luci-app-adblock-fast 失败"
+              fi
+              rm -rf "$tmpdir"
+
               
             fi
             
