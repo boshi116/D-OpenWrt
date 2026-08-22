@@ -1083,25 +1083,3 @@ msgstr "SmartDNS nft set"
 #: applications/luci-app-adblock-fast/htdocs/luci-static/resources/view/adblock-fast/overview.js:311
 msgid "unbound adblock list"
 msgstr "Unbound 광고 차단 목록"
-
-#~ msgid "Do not use simultaneous processing"
-#~ msgstr "동시 처리 사용 안 함"
-
-#~ msgid "Failed to detect format %s"
-#~ msgstr "%s 형식 감지 실패함"
-
-#~ msgid ""
-#~ "Launch all lists downloads and processing simultaneously, reducing "
-#~ "service start time."
-#~ msgstr ""
-#~ "모든 목록 다운로드 및 처리를 동시에 시작하여 서비스 시작 시간을 단축합니"
-#~ "다."
-
-#~ msgid "Use simultaneous processing"
-#~ msgstr "동시 처리 사용"
-
-#~ msgid "Error"
-#~ msgstr "에러"
-
-#~ msgid "Warning"
-#~ msgstr "경고"

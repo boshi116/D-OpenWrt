@@ -368,7 +368,8 @@ msgstr "Det gick inte att skapa filen ”%s”"
 
 #: applications/luci-app-adblock-fast/htdocs/luci-static/resources/adblock-fast/status.js:165
 msgid "Failed to create block-list or restart DNS resolver"
-msgstr "Det gick inte att skapa blockeringslistan eller starta om DNS-resolvern"
+msgstr ""
+"Det gick inte att skapa blockeringslistan eller starta om DNS-resolvern"
 
 #: applications/luci-app-adblock-fast/htdocs/luci-static/resources/adblock-fast/status.js:160
 msgid "Failed to create compressed cache"
@@ -993,8 +994,8 @@ msgstr "Använd annonsblockering på dnsmasq-instans(er)"
 msgid ""
 "Use of external dnsmasq config file detected, please set '%s' option to '%s'"
 msgstr ""
-"En extern dnsmasq-konfigurationsfil har identifierats. Ange alternativet ”%s"
-"” till ”%s”."
+"En extern dnsmasq-konfigurationsfil har identifierats. Ange alternativet "
+"”%s” till ”%s”."
 
 #: applications/luci-app-adblock-fast/htdocs/luci-static/resources/view/adblock-fast/overview.js:481
 msgid "Verbose output"
@@ -1095,18 +1096,3 @@ msgstr "smartdns-nft-set"
 #: applications/luci-app-adblock-fast/htdocs/luci-static/resources/view/adblock-fast/overview.js:311
 msgid "unbound adblock list"
 msgstr "Unbound-annonsblockeringslista"
-
-#~ msgid "Use simultaneous processing"
-#~ msgstr "Använd simultan behandling"
-
-#~ msgid "Error"
-#~ msgstr "Fel"
-
-#~ msgid "Fail"
-#~ msgstr "Misslyckas"
-
-#~ msgid "Warning"
-#~ msgstr "Varning"
-
-#~ msgid "AdBlock on all instances"
-#~ msgstr "AdBlock på alla instanser"

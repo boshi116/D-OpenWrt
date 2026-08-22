@@ -7,8 +7,8 @@ msgstr ""
 "Language: ro\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=n==1 ? 0 : "
-"(n==0 || (n%100 > 0 && n%100 < 20)) ? 1 : 2;\n"
+"Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < "
+"20)) ? 1 : 2;\n"
 "X-Generator: Weblate 5.15-dev\n"
 
 #: applications/luci-app-adblock-fast/htdocs/luci-static/resources/adblock-fast/status.js:134
@@ -1053,31 +1053,3 @@ msgstr ""
 #: applications/luci-app-adblock-fast/htdocs/luci-static/resources/view/adblock-fast/overview.js:311
 msgid "unbound adblock list"
 msgstr "listă nelegată adblock"
-
-#~ msgid "Do not use simultaneous processing"
-#~ msgstr "Nu folosiți procesarea simultană"
-
-#~ msgid "Failed to detect format %s"
-#~ msgstr "Nu a reușit să detecteze formatul %s"
-
-#~ msgid ""
-#~ "Launch all lists downloads and processing simultaneously, reducing "
-#~ "service start time."
-#~ msgstr ""
-#~ "Lansarea simultană a tuturor descărcărilor și procesării listelor, "
-#~ "reducând timpul de pornire a serviciului."
-
-#~ msgid "Use simultaneous processing"
-#~ msgstr "Utilizați procesarea simultană"
-
-#~ msgid "Error"
-#~ msgstr "Eroare"
-
-#~ msgid "Fail"
-#~ msgstr "Eșec"
-
-#~ msgid "Warning"
-#~ msgstr "Atenționare"
-
-#~ msgid "AdBlock on all instances"
-#~ msgstr "AdBlock pe toate instanțele"

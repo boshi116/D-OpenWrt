@@ -1053,28 +1053,3 @@ msgstr ""
 #: applications/luci-app-adblock-fast/htdocs/luci-static/resources/view/adblock-fast/overview.js:311
 msgid "unbound adblock list"
 msgstr "Liste Adblock unbound"
-
-#~ msgid "Do not use simultaneous processing"
-#~ msgstr "Ne pas utiliser de processus simultanés"
-
-#~ msgid ""
-#~ "Launch all lists downloads and processing simultaneously, reducing "
-#~ "service start time."
-#~ msgstr ""
-#~ "Lancer simultanément le téléchargement et le traitement de toutes les "
-#~ "listes, ce qui réduit le temps de démarrage du service."
-
-#~ msgid "Use simultaneous processing"
-#~ msgstr "Utiliser des processus simultanés"
-
-#~ msgid "Error"
-#~ msgstr "Erreur"
-
-#~ msgid "Fail"
-#~ msgstr "Echec"
-
-#~ msgid "Warning"
-#~ msgstr "Avertissement"
-
-#~ msgid "AdBlock on all instances"
-#~ msgstr "AdBlock sur toutes les instances"

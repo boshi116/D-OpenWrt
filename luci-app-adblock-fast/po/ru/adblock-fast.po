@@ -2,9 +2,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: LuCI: simple-adblock\n"
 "POT-Creation-Date: 2017-12-07 14:00+0300\n"
-"PO-Revision-Date: 2026-08-16 22:03+0000\n"
-"Last-Translator: SnIPeRSnIPeR <snipersniper@users.noreply.hosted.weblate.org>"
-"\n"
+"PO-Revision-Date: 2026-08-14 12:12+0000\n"
+"Last-Translator: SnIPeRSnIPeR "
+"<snipersniper@users.noreply.hosted.weblate.org>\n"
 "Language-Team: Russian <https://hosted.weblate.org/projects/openwrt/"
 "luciapplicationsadblock-fast/ru/>\n"
 "Language: ru\n"
@@ -836,7 +836,7 @@ msgstr "Запуск службы %s"
 
 #: applications/luci-app-adblock-fast/htdocs/luci-static/resources/view/status/include/70_adblock-fast.js:39
 msgid "Status"
-msgstr "Статус"
+msgstr "Состояние"
 
 #: applications/luci-app-adblock-fast/htdocs/luci-static/resources/adblock-fast/status.js:737
 msgid "Stop"
@@ -1105,89 +1105,3 @@ msgstr "smartdns nftset"
 #: applications/luci-app-adblock-fast/htdocs/luci-static/resources/view/adblock-fast/overview.js:311
 msgid "unbound adblock list"
 msgstr "несвязанный список Adblock"
-
-#~ msgid "Do not use simultaneous processing"
-#~ msgstr "Не использовать одновременную обработку"
-
-#~ msgid "Failed to detect format %s"
-#~ msgstr "Не удалось определить формат %s"
-
-#~ msgid ""
-#~ "Launch all lists downloads and processing simultaneously, reducing "
-#~ "service start time."
-#~ msgstr ""
-#~ "Запускает все загрузки и обработки списков одновременно, сокращая время "
-#~ "запуска службы."
-
-#~ msgid "Use simultaneous processing"
-#~ msgstr "Использовать одновременную обработку"
-
-#~ msgid "Token for <a href=\""
-#~ msgstr "Токен для <a href=\\\""
-
-#~ msgid "Cron entry does not match the schedule; click %s to overwrite it."
-#~ msgstr ""
-#~ "Запись cron не соответствует расписанию; нажмите «%s», чтобы перезаписать "
-#~ "её."
-
-#~ msgid "Cron entry is missing; click %s to recreate it."
-#~ msgstr "Запись cron отсутствует; нажмите «%s», чтобы создать её заново."
-
-#~ msgid "Failed to sync cron schedule"
-#~ msgstr "Не удалось синхронизировать расписание cron"
-
-#~ msgid "Pausing %s"
-#~ msgstr "Пауза %s"
-
-#~ msgid "Resync Cron"
-#~ msgstr "Пересинхронизировать cron"
-
-#~ msgid "Syncing cron schedule"
-#~ msgstr "Синхронизация расписания cron"
-
-#~ msgid "Error"
-#~ msgstr "Ошибка"
-
-#~ msgid "Fail"
-#~ msgstr "Провал"
-
-#~ msgid "Warning"
-#~ msgstr "Предупреждение"
-
-#~ msgid "AdBlock on all instances"
-#~ msgstr "AdBlock во всех случаях"
-
-#~ msgid "AdBlock on select instances"
-#~ msgstr "AdBlock в отдельных экземплярах"
-
-#~ msgid "No AdBlock on SmartDNS"
-#~ msgstr "Отсутствие AdBlock на SmartDNS"
-
-#~ msgid "No AdBlock on dnsmasq"
-#~ msgstr "Отсутствие AdBlock на dnsmasq"
-
-#~ msgid "Pick the SmartDNS instance(s) for AdBlocking"
-#~ msgstr "Выберите экземпляр(ы) SmartDNS для AdBlocking"
-
-#~ msgid "Pick the dnsmasq instance(s) for AdBlocking"
-#~ msgstr "Выберите экземпляр(ы) dnsmasq для AdBlocking"
-
-#~ msgid "Use AdBlocking on the SmartDNS instance(s)"
-#~ msgstr "Использовать AdBlocking на экземпляре(ах) SmartDNS"
-
-#~ msgid "Use AdBlocking on the dnsmasq instance(s)"
-#~ msgstr "Использовать блокировку рекламы на экземпляре(ах) dnsmasq"
-
-#~ msgid ""
-#~ "You can limit the AdBlocking to the specific SmartDNS instance(s) (%smore "
-#~ "information%s)."
-#~ msgstr ""
-#~ "Вы можете ограничить AdBlocking конкретным экземпляром SmartDNS "
-#~ "(%sдополнительная информация%s)."
-
-#~ msgid ""
-#~ "You can limit the AdBlocking to the specific dnsmasq instance(s) (%smore "
-#~ "information%s)."
-#~ msgstr ""
-#~ "Вы можете ограничить блокировку AdBlock конкретным экземпляром "
-#~ "(экземплярами) dnsmasq (%sдополнительная информация%s)."

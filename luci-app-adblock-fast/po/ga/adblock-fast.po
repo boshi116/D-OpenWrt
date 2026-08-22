@@ -7,8 +7,8 @@ msgstr ""
 "Language: ga\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=5; plural=n==1 ? 0 : n==2 ? 1 : (n>2 && n<7) ? 2 :(n>"
-"6 && n<11) ? 3 : 4;\n"
+"Plural-Forms: nplurals=5; plural=n==1 ? 0 : n==2 ? 1 : (n>2 && n<7) ? 2 :"
+"(n>6 && n<11) ? 3 : 4;\n"
 "X-Generator: Weblate 2026.7.dev0\n"
 
 #: applications/luci-app-adblock-fast/htdocs/luci-static/resources/adblock-fast/status.js:134
@@ -1108,88 +1108,3 @@ msgstr "smartdns nft set"
 #: applications/luci-app-adblock-fast/htdocs/luci-static/resources/view/adblock-fast/overview.js:311
 msgid "unbound adblock list"
 msgstr "liosta adblock neamhcheangailte"
-
-#~ msgid "Do not use simultaneous processing"
-#~ msgstr "Ná húsáid próiseáil chomhuaineach"
-
-#~ msgid "Failed to detect format %s"
-#~ msgstr "Theip ar fhormáid %s a bhrath"
-
-#~ msgid ""
-#~ "Launch all lists downloads and processing simultaneously, reducing "
-#~ "service start time."
-#~ msgstr ""
-#~ "Seoladh gach íoslódálacha liostaí agus próiseáil ag an am céanna, ag "
-#~ "laghdú am tosaithe na seirbhíse."
-
-#~ msgid "Use simultaneous processing"
-#~ msgstr "Úsáid próiseáil chomhuain"
-
-#~ msgid "Token for <a href=\""
-#~ msgstr "Comhartha le haghaidh <a href=\""
-
-#~ msgid "Cron entry does not match the schedule; click %s to overwrite it."
-#~ msgstr ""
-#~ "Ní oireann an iontráil Cron don sceideal; cliceáil %s chun é a athscríobh."
-
-#~ msgid "Cron entry is missing; click %s to recreate it."
-#~ msgstr "Tá iontráil Cron ar iarraidh; cliceáil %s chun í a athchruthú."
-
-#~ msgid "Failed to sync cron schedule"
-#~ msgstr "Theip ar sceideal cron a shioncronú"
-
-#~ msgid "Pausing %s"
-#~ msgstr "Ag stopadh %s"
-
-#~ msgid "Resync Cron"
-#~ msgstr "Athshioncrónaigh Cron"
-
-#~ msgid "Syncing cron schedule"
-#~ msgstr "Sceideal cron á shioncronú"
-
-#~ msgid "Error"
-#~ msgstr "Earráid"
-
-#~ msgid "Fail"
-#~ msgstr "Teip"
-
-#~ msgid "Warning"
-#~ msgstr "Aire"
-
-#~ msgid "AdBlock on all instances"
-#~ msgstr "AdBlock ar gach cás"
-
-#~ msgid "AdBlock on select instances"
-#~ msgstr "AdBlock ar chásanna roghnaithe"
-
-#~ msgid "No AdBlock on SmartDNS"
-#~ msgstr "Gan AdBlock ar SmartDNS"
-
-#~ msgid "No AdBlock on dnsmasq"
-#~ msgstr "Níl aon AdBlock ar dnsmasq"
-
-#~ msgid "Pick the SmartDNS instance(s) for AdBlocking"
-#~ msgstr "Roghnaigh na samplaí SmartDNS le haghaidh AdBlocking"
-
-#~ msgid "Pick the dnsmasq instance(s) for AdBlocking"
-#~ msgstr "Roghnaigh na samplaí dnsmasq le haghaidh AdBlocking"
-
-#~ msgid "Use AdBlocking on the SmartDNS instance(s)"
-#~ msgstr "Úsáid AdBlocking ar na samplaí SmartDNS"
-
-#~ msgid "Use AdBlocking on the dnsmasq instance(s)"
-#~ msgstr "Úsáid AdBlocking ar na sampla (í) dnsmasq"
-
-#~ msgid ""
-#~ "You can limit the AdBlocking to the specific SmartDNS instance(s) (%smore "
-#~ "information%s)."
-#~ msgstr ""
-#~ "Is féidir leat an AdBlocking a theorannú go dtí na samplaí ar leith "
-#~ "SmartDNS (%sTuilleadh faisnéise %s)."
-
-#~ msgid ""
-#~ "You can limit the AdBlocking to the specific dnsmasq instance(s) (%smore "
-#~ "information%s)."
-#~ msgstr ""
-#~ "Is féidir leat an AdBlocking a theorannú go dtí na samplaí sonracha "
-#~ "dnsmasq (%sTuilleadh faisnéise %s)."

@@ -1074,31 +1074,3 @@ msgstr "nft set smartdns"
 #: applications/luci-app-adblock-fast/htdocs/luci-static/resources/view/adblock-fast/overview.js:311
 msgid "unbound adblock list"
 msgstr "danh sách chặn quảng cáo không bị ràng buộc"
-
-#~ msgid "Do not use simultaneous processing"
-#~ msgstr "Không sử dụng xử lý đồng thời"
-
-#~ msgid "Failed to detect format %s"
-#~ msgstr "Không thể phát hiện định dạng %s"
-
-#~ msgid ""
-#~ "Launch all lists downloads and processing simultaneously, reducing "
-#~ "service start time."
-#~ msgstr ""
-#~ "Khởi chạy tải xuống và xử lý tất cả các danh sách đồng thời, giảm thời "
-#~ "gian khởi động dịch vụ."
-
-#~ msgid "Use simultaneous processing"
-#~ msgstr "Sử dụng xử lý đồng thời"
-
-#~ msgid "Error"
-#~ msgstr "Lỗi"
-
-#~ msgid "Fail"
-#~ msgstr "Thất bại"
-
-#~ msgid "Warning"
-#~ msgstr "Cảnh báo"
-
-#~ msgid "AdBlock on all instances"
-#~ msgstr "AdBlock trên tất cả"

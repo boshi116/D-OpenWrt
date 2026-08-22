@@ -1047,28 +1047,3 @@ msgstr ""
 #: applications/luci-app-adblock-fast/htdocs/luci-static/resources/view/adblock-fast/overview.js:311
 msgid "unbound adblock list"
 msgstr ""
-
-#~ msgid "Do not use simultaneous processing"
-#~ msgstr "Ne használjon egyidejű feldolgozást"
-
-#~ msgid ""
-#~ "Launch all lists downloads and processing simultaneously, reducing "
-#~ "service start time."
-#~ msgstr ""
-#~ "Az összes lista letöltéseinek és egyidejű feldolgozásának indítása, "
-#~ "csökkentve a szolgáltatás indítási idejét."
-
-#~ msgid "Use simultaneous processing"
-#~ msgstr "Egyidejű feldolgozás használata"
-
-#~ msgid "Error"
-#~ msgstr "Hiba"
-
-#~ msgid "Fail"
-#~ msgstr "Sikertelen"
-
-#~ msgid "Warning"
-#~ msgstr "Figyelmeztetés"
-
-#~ msgid "AdBlock on all instances"
-#~ msgstr "AdBlock minden esetben"
