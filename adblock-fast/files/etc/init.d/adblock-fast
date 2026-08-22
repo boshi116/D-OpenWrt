@@ -22,7 +22,7 @@ if type extra_command 1>/dev/null 2>&1; then
 fi
 
 readonly packageName='adblock-fast'
-readonly initCompat='17'
+readonly initCompat='18'
 readonly _ucode="ucode -S -L /lib/${packageName} /lib/${packageName}/cli.uc --"
 _procd_svc_data=
 _fw4_restart=
@@ -95,6 +95,7 @@ load_validate_config() {
 	uci_load_validate "$packageName" "$packageName" "$1" "${2}${3:+ ${3}}" \
 		'enabled:bool:0' \
 		'force_dns:bool:1' \
+		'gateway_check:or("netifd", "kernel", "none"):netifd' \
 		'force_dns_interface:list(network):lan' \
 		'force_dns_port:list(integer):53,853' \
 		'parallel_downloads:bool:1' \
