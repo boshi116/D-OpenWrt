@@ -74,17 +74,7 @@ jobs:
                 echo "⚠️ 警告: 处理 vlmcsd 失败"
               fi
               rm -rf "$tmpdir"
-            fi
-            
-            echo "🔄 处理特殊仓库: adblock-fast"
-            if tmpdir=$(mktemp -d); then
-              if git clone --depth 1 https://github.com/openwrt/packages "$tmpdir/packages" 2>/dev/null; then
-                cp -r "$tmpdir/packages/net/adblock-fast" "${DOWNLOAD_DIR}/adblock-fast" 2>/dev/null || true
-                echo "✅ 成功处理: adblock-fast"
-              else
-                echo "⚠️ 警告: 处理 adblock-fast 失败"
-              fi
-              rm -rf "$tmpdir"
+
             fi
             
             echo "🔄 处理特殊仓库: jell"
@@ -146,6 +136,7 @@ jobs:
             git_clone "https://github.com/UnblockNeteaseMusic/luci-app-unblockneteasemusic" "luci-app-unblockneteasemusic" || true
             git_clone "https://github.com/sbwml/luci-app-quickfile" "luci-app-quickfile" || true
             git_clone "https://github.com/mossdef-org/luci-app-adblock-fast" "luci-app-adblock-fast" || true
+            git_clone "https://github.com/mossdef-org/adblock-fast" "adblock-fast" || true
             git_clone "https://github.com/tty228/luci-app-wechatpush" "luci-app-wechatpush" || true
             git_clone "https://github.com/ZeaKyX/speedtest-web" "speedtest-web" || true
             git_clone "https://github.com/ZeaKyX/luci-app-speedtest-web" "luci-app-speedtest-web" || true
