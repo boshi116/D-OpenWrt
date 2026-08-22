@@ -135,8 +135,6 @@ jobs:
             git_clone "https://github.com/sbwml/luci-app-mosdns" "luci-app-mosdns" || true
             git_clone "https://github.com/UnblockNeteaseMusic/luci-app-unblockneteasemusic" "luci-app-unblockneteasemusic" || true
             git_clone "https://github.com/sbwml/luci-app-quickfile" "luci-app-quickfile" || true
-            git_clone "https://github.com/mossdef-org/luci-app-adblock-fast" "luci-app-adblock-fast" || true
-            git_clone "https://github.com/mossdef-org/adblock-fast" "adblock-fast" || true
             git_clone "https://github.com/tty228/luci-app-wechatpush" "luci-app-wechatpush" || true
             git_clone "https://github.com/ZeaKyX/speedtest-web" "speedtest-web" || true
             git_clone "https://github.com/ZeaKyX/luci-app-speedtest-web" "luci-app-speedtest-web" || true
