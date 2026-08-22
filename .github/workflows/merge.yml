@@ -91,39 +91,53 @@ jobs:
               fi
               rm -rf "$tmpdir"
               
-              fi
-            
-            echo "🔄 处理特殊仓库: adblock-fast"
+             fi
+
+            echo "🔄 处理特殊仓库: adblock‑fast + luci‑app‑adblock‑fast (openwrt‑24.10 sparse-checkout)"
             if tmpdir=$(mktemp -d); then
-              if git clone --depth 1 https://github.com/openwrt/packages "$tmpdir/packages" 2>/dev/null; then
-                cp -r "$tmpdir/packages/net/adblock-fast" "${DOWNLOAD_DIR}/adblock-fast" 2>/dev/null || true
-                echo "✅ 成功处理: adblock-fast"
-              else
-                echo "⚠️ 警告: 处理 adblock-fast 失败"
-              fi
-              rm -rf "$tmpdir"
-              fi
+                backend_ok=0
+                luci_ok=0
 
-            echo "🔄 处理特殊仓库: luci-app-adblock-fast"
-            if tmpdir=$(mktemp -d); then
-              mkdir -p "$tmpdir/luci"
-              pushd "$tmpdir/luci" >/dev/null
-              git init
-              git remote add origin https://github.com/openwrt/luci
-              git config core.sparseCheckout true
-              echo "applications/luci-app-adblock-fast" >> .git/info/sparse-checkout
-              git pull --depth 1 origin master 2>/dev/null
-              popd >/dev/null
+                #===== 后端 adblock‑fast packages/net/adblock‑fast =====
+                mkdir -p "$tmpdir/packages"
+                pushd "$tmpdir/packages" >/dev/null
+                git init
+                git remote add origin https://github.com/openwrt/packages
+                git config core.sparseCheckout true
+                echo "net/adblock-fast" >> .git/info/sparse-checkout
+                git pull --depth 1 origin openwrt-24.10 2>/dev/null
+                popd >/dev/null
 
-              if [ -d "$tmpdir/luci/applications/luci-app-adblock-fast" ];then
-                cp -r "$tmpdir/luci/applications/luci-app-adblock-fast" "${DOWNLOAD_DIR}/luci-app-adblock-fast" 2>/dev/null || true
-                echo "✅ 成功处理: luci-app-adblock-fast"
-              else
-                echo "⚠️ 警告: 处理 luci-app-adblock-fast 失败"
-              fi
-              rm -rf "$tmpdir"
+                if [ -d "$tmpdir/packages/net/adblock-fast" ];then
+                    cp -r "$tmpdir/packages/net/adblock-fast" "${DOWNLOAD_DIR}/adblock-fast" 2>/dev/null || true
+                    backend_ok=1
+                    echo "✅ 后端 adblock‑fast 复制完成"
+                else
+                    echo "⚠️ 警告: 获取 adblock‑fast 后端失败"
+                fi
 
-              
+                #===== 前端 luci‑app‑adblock‑fast applications/luci‑app‑adblock‑fast =====
+                mkdir -p "$tmpdir/luci"
+                pushd "$tmpdir/luci" >/dev/null
+                git init
+                git remote add origin https://github.com/openwrt/luci
+                git config core.sparseCheckout true
+                echo "applications/luci-app-adblock-fast" >> .git/info/sparse-checkout
+                git pull --depth 1 origin openwrt-24.10 2>/dev/null
+                popd >/dev/null
+
+                if [ -d "$tmpdir/luci/applications/luci-app-adblock-fast" ];then
+                    cp -r "$tmpdir/luci/applications/luci-app-adblock-fast" "${DOWNLOAD_DIR}/luci-app-adblock-fast" 2>/dev/null || true
+                    luci_ok=1
+                    echo "✅ 界面 luci‑app‑adblock‑fast 复制完成"
+                else
+                    echo "⚠️ 警告: 获取 luci‑app‑adblock‑fast 界面失败"
+                fi
+
+                if [ $backend_ok -eq 1 ] && [ $luci_ok -eq 1 ]; then
+                    echo "🎉 adblock‑fast 整套处理全部成功"
+                fi
+                rm -rf "$tmpdir"
             fi
             
             return 0
